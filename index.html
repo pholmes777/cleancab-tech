@@ -1474,7 +1474,7 @@ function techSaveFields()
     localStorage.setItem("icompany", cTechInstallerCompany.value);
     localStorage.setItem("iname", cTechInstallerName.value);
     localStorage.setItem("iphone", cTechInstallerPhone.value);
-    cTechInstallerEmail.setItem("iemail", cTechInstallerEmail.value);
+    localStorage.setItem("iemail", cTechInstallerEmail.value);
     localStorage.setItem("cleancab", "1");
 }
 
@@ -3606,7 +3606,7 @@ class blueToothCommission extends blueToothIf
             this.savedPlantNumber = cPlantNumber.value;
             this.savedPlantHours = cPlantHours.value;            
 
-            commissionDataValid = (myArray[0] === "V");    
+            this.commissionDataValid = (myArray[0] === "V");    
         }        
         else if (protocolVersion >= 2)
         {
