@@ -377,6 +377,33 @@
   </div>  
 </div>
 
+<div id="calibrationHistoryDiv" class="hiddenitemdiv">
+  <h3>Filter History</h3>
+  <div class="container">
+    <p id="calibrationHistorydbg"></p>
+    <div class="row">
+      <div class="col-30">
+        <button id="calibrationHistoryPrior" onclick="gotoCalibrationRec(-1)">Newer</button>
+      </div>
+      <div class="col-40 pad-10-lr">
+        <input type="text" id="calibrationHistoryPage" readonly value="1/8">
+      </div>
+      <div class="col-30 units">
+        <button id="calibrationHistoryNext" onclick="gotoCalibrationRec(1)">Older</button>
+      </div>
+    </div>
+    <div class="container"  id="calibrationHistoryDataDiv">
+    </div>
+    <div class="row">
+      <div class="col-70">
+      </div>
+      <div class="col-30 units">
+        <button id="calibrationHistorySave" onclick="saveCalibrationRecords()">Save to file</button>
+      </div>
+    </div>
+  </div> 
+</div>
+
 <div id="filterHistoryDiv" class="hiddenitemdiv">
   <h3>Filter History</h3>
   <div class="container">
@@ -1517,6 +1544,7 @@ const connectingTicks = document.querySelector("#connectingTicks");
 var selectDisplay;
 var activeLinks;
 var filterHistory;
+var calibrationHistory;
 var alarmHistory;
 var authorizeControl;
 var calibrateControl;
@@ -1531,6 +1559,7 @@ function init()
     //activeLinks = "connectedLinks";
     // testing lines end
     
+    calibrationHistory = new calibrationHistoryClass("calibration", "Commission");
     filterHistory = new filterHistoryClass("filter", "Filter");
     alarmHistory = new alarmHistoryClass("alarm", "Alarm");
     authorizeControl = new authorizeClass();
@@ -1617,6 +1646,13 @@ function showSelected()
             if (alarmHistory)
             {
                 alarmHistory.loadHistoryDiv(0);
+            }
+        }
+        else if (selectDisplay == "calibrationHistoryDiv")
+        {
+            if (calibrationHistory)
+            {
+                calibrationHistory.loadHistoryDiv(0);
             }
         }
     }
@@ -2549,6 +2585,7 @@ class blueToothTest extends blueToothIf
     }
 }
 
+
 //==========================================================
 //
 //          Filter setting/change
@@ -3085,6 +3122,92 @@ function authorizeCommission()
     }
 }
 
+
+function gotoCalibrationRec(recDir)
+{
+    if (calibrationHistory)
+    {
+        calibrationHistory.gotoRecord(recDir);
+    }
+}
+
+function saveCalibrationRecords()
+{
+    if (calibrationHistory)
+    {
+        calibrationHistory.exportRecords();
+    }
+}
+
+class calibrationHistoryClass extends historyClass
+{
+    setRec(id)
+    {
+        this.savedRec = id;
+    }
+    
+    doDecode(data)
+    {
+        const decodedValue = new TextDecoder().decode(data);
+
+        return decodedValue.split("|");
+    }
+    
+    setExportFileHeader()
+    {
+        this.fileData = "Date,Company,Name,Phone\r\n";
+    }
+
+    dataValid(data)
+    {
+        return doDecode(data).length >= 6;
+    }
+    
+    dataRecordNumber(data)
+    {
+        return this.savedRec;
+    }
+    
+    dataNumOfRecords(data)
+    {
+        return 8;
+    }
+    
+    dataAddToFileData(data)
+    {
+        const myArray = doDecode(data);
+        
+        this.fileData  += this.dataDate(data) + "," +
+                          this.dataRecordType(data) + "," +
+                          myArray[4] + "," +
+                          myArray[5] + "\r\n";                                     
+    }
+    
+    dataAddDetailElements(detailsDiv, data)
+    {               
+        const myArray = doDecode(data);
+        
+        this.addRowElement(detailsDiv, "Name", myArray[4]);
+        this.addRowElement(detailsDiv, "Contact", myArray[5]);
+    }
+    
+    dataDate(data)
+    {
+        const myDate = doDecode(data)[3].split("-");
+        
+        if (myDate.length >= 3)
+        {
+            return myDate[2] + "-" + myDate[1] + "-" + myDate[0];
+        }
+        return "01-01-2000";
+    }
+    
+    dataRecordType(data)
+    {
+        return doDecode(data)[3]; // the company
+    }
+}
+
 // bluetooth interface class
 
 class blueToothCommission extends blueToothIf
@@ -3115,6 +3238,11 @@ class blueToothCommission extends blueToothIf
         this.savedPlantHours = "";
         
         this.commissionDataValid = false;
+        
+        this.sendCalQuery = false;
+        this.readCalResponse = false;
+        
+        this.currentCalibrationIdx = 0;
     }
         
     disconnected()
@@ -3124,6 +3252,8 @@ class blueToothCommission extends blueToothIf
         this.commissionDataValid = false;
         this.send = false;
         this.sendCal = false;
+        this.sendCalQuery = false;
+        this.readCalResponse = false;
         if (this.calibrateMenuItem)
         {
             this.calibrateMenuItem.remove();
@@ -3378,6 +3508,52 @@ class blueToothCommission extends blueToothIf
         }
     }
     
+    getId()
+    {
+        return 0;
+    }
+    
+    requestNextCalRecord()
+    {
+        if (this.calReadId > 0)
+        {
+            this.calReadId--;
+                    
+            let nextId = 10 + this.currentCalibrationIdx + this.calReadId;
+            if (nextId > 18)
+            {
+                nextId -= 8;
+            }
+            this.retries = 0;
+            
+            const encodedValue = new TextEncoder().encode(nextId.toString());    
+            
+            this.write(encodedValue);
+                    
+            return true;
+        }
+        return false;
+    }
+    
+    setReadRecord(rec)
+    {
+        if (rec == 3 && this.currentCalibrationIdx != 0)
+        {
+            bleiface.setMessage(DBG_INFO, this.getName() + " Start Read from back");
+                        
+            this.calReadId = 8;
+            
+            requestNextCalRecord();
+        }
+    }
+
+    setGotoRecord(cmd, rec)
+    {
+        // there are only 8 records so it fits on a page, so always just read all
+        
+        setReadRecord(3);
+    }    
+    
     setRead(readValue)
     {
         super.setRead(readValue);
@@ -3419,6 +3595,32 @@ class blueToothCommission extends blueToothIf
             {
                 // Cw   is value was written
             }
+            else if (myArray.length >= 2 &&
+                     myArray[0][0] == 'C' &&
+                     (myArray[0][1] >= '1' && myArray[0][1] <= '8'))
+            {
+                // handle history Reading
+                
+                calibrationHistory.setRec(this.calReadId);
+                
+                requestNextCalRecord();
+
+                if (myArray[1] === "-")                
+                {
+                    // invalid calibration record
+
+                    if (this.calReadId == 0)
+                    {
+                        calibrationHistory.readDone();
+                    }
+                }
+                else
+                {
+                    // calibration record is valid so handle it
+                    
+                    calibrationHistory.handleRecordRead(id, readValue); 
+                }
+            }            
             else if (myArray.length == 2)
             {
                 // CC|- is no current Calibration
@@ -3427,6 +3629,7 @@ class blueToothCommission extends blueToothIf
                 if (myArray[0] === "CC" &&
                     myArray[1] === "-")
                 {
+                    this.currentCalibrationIdx = 0;
                     cCalibrationDate.value = getNowDateForInput();
                     cCalibrationName.value = "";
                     cCalibrationCompany.value = "";
@@ -3442,15 +3645,20 @@ class blueToothCommission extends blueToothIf
             {
                 // CC|id|date|name|company|phone|hours is the current calibration record
                 
-                cCalibrationDate.value = myArray[2]
-                cCalibrationCompany.value = myArray[3];
-                cCalibrationName.value = myArray[4];
-                cCalibrationPhone.value = myArray[5];  
+                if (myArray[0] === "CC")
+                {
+                    this.currentCalibrationIdx = myArray[1];
+                    
+                    cCalibrationDate.value = myArray[2]
+                    cCalibrationCompany.value = myArray[3];
+                    cCalibrationName.value = myArray[4];
+                    cCalibrationPhone.value = myArray[5];  
 
-                this.savedCalibrationName = cCalibrationName.value;
-                this.savedCalibrationPhone = cCalibrationPhone.value;
-                this.savedCalibrationCompany = cCalibrationCompany.value;
-                this.savedCalibrationDate = cCalibrationDate.value;                
+                    this.savedCalibrationName = cCalibrationName.value;
+                    this.savedCalibrationPhone = cCalibrationPhone.value;
+                    this.savedCalibrationCompany = cCalibrationCompany.value;
+                    this.savedCalibrationDate = cCalibrationDate.value;                
+                }             
             }
         }
         if (!this.commissionDataValid)
@@ -3497,24 +3705,50 @@ class blueToothCommission extends blueToothIf
 
     run()
     {
-        if (this.send)
+        // the order of these if statements is important
+        
+        if (this.readCalResponse)
         {
-            if (this.sendCal)
-            {
-                const encodedValue = new TextEncoder().encode("1");
-            
-                this.write(encodedValue);
-                this.sendCal = false;
-            }
-            else
-            {
-                this.send = false;
-
-                const encodedValue = new TextEncoder().encode(this.sendValue);
-            
-                this.write(encodedValue);
-            }
+            this.readCalResponse = false;
+            bleiface.itemReadWithBusy(this);
         }
+        else if (this.sendCal)
+        {
+            // tell device we are about to write a calibration record. (send already set)
+            
+            const encodedValue = new TextEncoder().encode("1");
+            
+            this.write(encodedValue);
+            this.sendCal = false;
+                
+            // writing a calibration record, so read back the current after its done
+                
+            this.sendCalQuery = true;
+        }
+        else if (this.send)
+        {
+            // send a calibration or commission record
+            
+            this.send = false;
+
+            const encodedValue = new TextEncoder().encode(this.sendValue);
+            
+            this.write(encodedValue);
+        }
+        else if (this.sendCalQuery)
+        {
+            // tell the device we want to read the current calibration record
+            
+            const encodedValue = new TextEncoder().encode("2"); // setup to read current record   
+            
+            this.write(encodedValue);
+            this.sendCalQuery = false;
+            this.readCalResponse = true;
+        }
+        else
+        {
+            calibrationHistory.handleHistoryLoading();
+        }        
     }
 }
 
