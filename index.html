@@ -3542,7 +3542,18 @@ bleiface.setMessage(DBG_INFO, "Calrequest: RequestNext=" + this.calReadId);
         {
             this.calReadId--;
                     
-            let nextId = 10 + this.currentCalibrationIdx + this.calReadId;
+            var nextId;
+
+            if (this.currentCalibrationIdx > 0)
+            {
+                nextId = 10 + this.currentCalibrationIdx + this.calReadId;
+            }
+            else
+            {
+                // dummy read as calibration is empty-cells
+                
+                nextId = 11;    
+            }
             if (nextId > 18)
             {
                 nextId -= 8;
