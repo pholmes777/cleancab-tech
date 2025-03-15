@@ -3566,12 +3566,19 @@ bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
     {
 bleiface.setMessage(DBG_INFO, "setReadRecord: Data=" + rec);    
 
-        if (rec == 3 && this.currentCalibrationIdx != 0)
+        if (rec == 3)
         {
-            bleiface.setMessage(DBG_INFO, this.getName() + " Start Read from back");
+            if (this.currentCalibrationIdx != 0)
+            {
+                bleiface.setMessage(DBG_INFO, this.getName() + " Start Read from back");
                         
-            this.calReadId = 8;
-            
+                this.calReadId = 8;                            
+            }
+            else
+            {
+                bleiface.setMessage(DBG_INFO, this.getName() + " No valid records");
+                this.calReadId = 1;
+            }
             this.requestNextCalRecord();
         }
     }
