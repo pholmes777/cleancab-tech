@@ -42,7 +42,7 @@
   </a>
 </div>
 
-<div id="debugDiv">
+<!--div id="debugDiv">
   <div class="container">
     <div class="row">
       <p id="phdbg"></p>
@@ -51,7 +51,7 @@
         <input id="phdbgBtn" type="button" value="Clear" onclick="phdbgClear()" class="btn">
     </div>
   </div>
-</div>
+</div-->
 
 <div id="connectingDiv" class="hiddenitemdiv">
   <h3>Connection</h3>
@@ -1436,7 +1436,7 @@ if ('serviceWorker' in navigator)
 //
 //=====================================================
 
-const phdbg = document.querySelector("#phdbg");
+//const phdbg = document.querySelector("#phdbg");
 //var phdbgc = 0;
 var menuDisabled=false;
 
@@ -3186,7 +3186,6 @@ class calibrationHistoryClass extends historyClass
 
     dataValid(data)
     {
-    bleiface.setMessage(DBG_INFO, "check valid: " + this.doDecode(data).length);
         return this.doDecode(data).length >= 6;
     }
     
@@ -3228,7 +3227,7 @@ class calibrationHistoryClass extends historyClass
     
     dataDate(data)
     {
-        const myDate = this.doDecode(data)[3].split("-");
+        const myDate = this.doDecode(data)[2].split("-");
         
         if (myDate.length >= 3)
         {
@@ -3594,7 +3593,6 @@ class blueToothCommission extends blueToothIf
             this.retries = 0;
             
             let req = nextId.toString();
-bleiface.setMessage(DBG_INFO, this.getName() + " req=" + req);
             
             const encodedValue = new TextEncoder().encode(req);    
             
@@ -3638,8 +3636,6 @@ bleiface.setMessage(DBG_INFO, this.getName() + " req=" + req);
     
         const decodedValue = new TextDecoder().decode(readValue);
 
-bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
-
         const myArray = decodedValue.split("|");
     
         if ((myArray.length >= 7 && protocolVersion < 2) ||
@@ -3680,17 +3676,12 @@ bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
                      (myArray[0][1] >= '1' && myArray[0][1] <= '8'))
             {
                 // handle history Reading
-
-bleiface.setMessage(DBG_INFO, this.getName() + " Got:" + decodedValue + ", id=" + this.calReadId);                
-                calibrationHistory.setRec(this.calReadId);
-                
-                
+              
+                calibrationHistory.setRec(this.calReadId);                               
 
                 if (myArray[1] === "-")                
                 {
-                    // invalid calibration record
-
-bleiface.setMessage(DBG_INFO, this.getName() + " Invalid");                
+                    // invalid calibration record             
 
                     if (this.calReadId == 0)
                     {
@@ -3699,9 +3690,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Invalid");
                 }
                 else
                 {
-                    // calibration record is valid so handle it
-
-bleiface.setMessage(DBG_INFO, this.getName() + " Valid");                
+                    // calibration record is valid so handle it              
 
                     this.calNumRecs++;
                     calibrationHistory.setNumRecs(this.calNumRecs);
@@ -3765,8 +3754,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
             {
                 bleiface.setMessage(DBG_CONNECT, "Reading calibration record");
                 this.initState++;
-                
-bleiface.setMessage(DBG_INFO, "Request current calibration record");                
+                                
                 const encodedValue = new TextEncoder().encode("2");
             
                 this.write(encodedValue);
@@ -3779,8 +3767,7 @@ bleiface.setMessage(DBG_INFO, "Request current calibration record");
         else
         {
             if (this.initState == 0x01)
-            {
-bleiface.setMessage(DBG_INFO, "wait read");                
+            {              
                 this.initState++;
                 bleiface.itemReadWithBusy(this);
             }
