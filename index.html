@@ -3582,6 +3582,8 @@ class blueToothCommission extends blueToothIf
     
         const decodedValue = new TextDecoder().decode(readValue);
 
+bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
+
         const myArray = decodedValue.split("|");
     
         if ((myArray.length >= 7 && protocolVersion < 2) ||
@@ -3627,6 +3629,7 @@ class blueToothCommission extends blueToothIf
                 
                 requestNextCalRecord();
 
+bleiface.setMessage(DBG_INFO, "Rec=" + this.calReadId + " Valid=" + myArray[1]);
                 if (myArray[1] === "-")                
                 {
                     // invalid calibration record
