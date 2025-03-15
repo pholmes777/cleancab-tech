@@ -3569,7 +3569,7 @@ bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
                         
             this.calReadId = 8;
             
-            requestNextCalRecord();
+            this.requestNextCalRecord();
         }
     }
 
@@ -3631,7 +3631,7 @@ bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
                 
                 calibrationHistory.setRec(this.calReadId);
                 
-                requestNextCalRecord();
+                this.requestNextCalRecord();
 
 bleiface.setMessage(DBG_INFO, "Rec=" + this.calReadId + " Valid=" + myArray[1]);
                 if (myArray[1] === "-")                
