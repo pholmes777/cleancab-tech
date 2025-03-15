@@ -3619,7 +3619,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " req=" + req);
     
         const decodedValue = new TextDecoder().decode(readValue);
 
-//bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
+bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
 
         const myArray = decodedValue.split("|");
     
@@ -3715,7 +3715,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
                 
                 if (myArray[0] === "CC")
                 {
-                    this.currentCalibrationIdx = myArray[1];
+                    this.currentCalibrationIdx = parseInt(myArray[1]);
                     
                     cCalibrationDate.value = myArray[2]
                     cCalibrationCompany.value = myArray[3];
@@ -3747,6 +3747,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
                 bleiface.setMessage(DBG_CONNECT, "Reading calibration record");
                 this.initState++;
                 
+bleiface.setMessage(DBG_INFO, "Request current calibration record");                
                 const encodedValue = new TextEncoder().encode("2");
             
                 this.write(encodedValue);
@@ -3760,6 +3761,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
         {
             if (this.initState == 0x01)
             {
+bleiface.setMessage(DBG_INFO, "wait read");                
                 this.initState++;
                 bleiface.itemReadWithBusy(this);
             }
