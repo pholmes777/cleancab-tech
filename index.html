@@ -3537,6 +3537,7 @@ class blueToothCommission extends blueToothIf
     
     requestNextCalRecord()
     {
+bleiface.setMessage(DBG_INFO, "Calrequest: RequestNext=" + this.calReadId);    
         if (this.calReadId > 0)
         {
             this.calReadId--;
@@ -3563,6 +3564,8 @@ bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
     
     setReadRecord(rec)
     {
+bleiface.setMessage(DBG_INFO, "setReadRecord: Data=" + rec);    
+
         if (rec == 3 && this.currentCalibrationIdx != 0)
         {
             bleiface.setMessage(DBG_INFO, this.getName() + " Start Read from back");
