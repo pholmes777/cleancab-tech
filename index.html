@@ -3143,7 +3143,12 @@ function saveCalibrationRecords()
 }
 
 class calibrationHistoryClass extends historyClass
-{
+{   
+    setNumRecs(recs)
+    {
+        this.savedNumRecs = recs;
+    }
+    
     setRec(id)
     {
         this.savedRec = id;
@@ -3168,12 +3173,20 @@ class calibrationHistoryClass extends historyClass
     
     dataRecordNumber(data)
     {
-        return this.savedRec;
+        if (this.savedRec)        
+        {
+            return this.savedRec;
+        }
+        return 0;
     }
     
     dataNumOfRecords(data)
     {
-        return 8;
+        if (this.savedNumRecs)
+        {
+            return this.savedNumRecs;
+        }
+        return 0;
     }
     
     dataAddToFileData(data)
@@ -3247,6 +3260,8 @@ class blueToothCommission extends blueToothIf
         this.readCalResponse = false;
         
         this.currentCalibrationIdx = 0;
+        this.calReadId = 0;
+        this.calNumRecs = 0;
     }
         
     disconnected()
@@ -3536,8 +3551,7 @@ class blueToothCommission extends blueToothIf
     }
     
     requestNextCalRecord()
-    {
-bleiface.setMessage(DBG_INFO, "Calrequest: RequestNext=" + this.calReadId);    
+    {    
         if (this.calReadId > 0)
         {
             this.calReadId--;
@@ -3563,8 +3577,6 @@ bleiface.setMessage(DBG_INFO, "Calrequest: RequestNext=" + this.calReadId);
             let req = nextId.toString();
             
             const encodedValue = new TextEncoder().encode(req);    
-
-bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
             
             this.write(encodedValue);
                     
@@ -3574,9 +3586,7 @@ bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
     }
     
     setReadRecord(rec)
-    {
-bleiface.setMessage(DBG_INFO, "setReadRecord: Data=" + rec);    
-
+    {  
         if (rec == 3)
         {
             if (this.currentCalibrationIdx != 0)
@@ -3590,6 +3600,7 @@ bleiface.setMessage(DBG_INFO, "setReadRecord: Data=" + rec);
                 bleiface.setMessage(DBG_INFO, this.getName() + " No valid records");
                 this.calReadId = 1;
             }
+            this.calNumRecs = 0;
             this.requestNextCalRecord();
         }
     }
@@ -3654,20 +3665,21 @@ bleiface.setMessage(DBG_INFO, "setReadRecord: Data=" + rec);
                 
                 this.requestNextCalRecord();
 
-bleiface.setMessage(DBG_INFO, "Rec=" + this.calReadId + " Valid=" + myArray[1]);
                 if (myArray[1] === "-")                
                 {
                     // invalid calibration record
 
                     if (this.calReadId == 0)
                     {
-                        calibrationHistory.readDone();
+                        calibrationHistory.handleRecordRead(id, readValue);
                     }
                 }
                 else
                 {
                     // calibration record is valid so handle it
-                    
+
+                    this.calNumRecs++;
+                    calibrationHistory.setNumRecs(this.calNumRecs);
                     calibrationHistory.handleRecordRead(id, readValue); 
                 }
             }            
