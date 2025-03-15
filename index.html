@@ -1931,7 +1931,7 @@ class historyClass
                             this.count--;
                             result = true;
                     
-                            bleiface.itemReadWithBusy(item);
+                            readNext();
                         }
                         else
                         {
@@ -1948,6 +1948,11 @@ class historyClass
         return result;
     }
 
+    readNext(item)
+    {
+        bleiface.itemReadWithBusy(item);
+    }
+    
     readDone()
     {
         bleiface.setMessage(DBG_INFO, "History " + this.name + ": Finished");
@@ -3144,6 +3149,21 @@ function saveCalibrationRecords()
 
 class calibrationHistoryClass extends historyClass
 {   
+    readNext(item)
+    {
+        // need to send a command first, so go back to waiting
+        // for the command to be sent              
+        
+        if (item.requestNextCalRecord())
+        {
+            this.readState = 2;
+        }
+        else
+        {
+            this.readDone();
+        }
+    }
+    
     setNumRecs(recs)
     {
         this.savedNumRecs = recs;
@@ -3664,7 +3684,7 @@ bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
 bleiface.setMessage(DBG_INFO, this.getName() + " Got:" + decodedValue + ", id=" + this.calReadId);                
                 calibrationHistory.setRec(this.calReadId);
                 
-                this.requestNextCalRecord();
+                
 
                 if (myArray[1] === "-")                
                 {
