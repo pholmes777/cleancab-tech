@@ -3156,9 +3156,7 @@ class calibrationHistoryClass extends historyClass
     
     doDecode(data)
     {
-        const decodedValue = new TextDecoder().decode(data);
-
-        return decodedValue.split("|");
+        return data.split("|");
     }
     
     setExportFileHeader()
@@ -3168,6 +3166,7 @@ class calibrationHistoryClass extends historyClass
 
     dataValid(data)
     {
+    bleiface.setMessage(DBG_INFO, "check valid: " + doDecode(data).length);
         return doDecode(data).length >= 6;
     }
     
@@ -3675,7 +3674,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Invalid");
 
                     if (this.calReadId == 0)
                     {
-                        calibrationHistory.handleRecordRead(0, readValue);
+                        calibrationHistory.handleRecordRead(0, decodedValue);
                     }
                 }
                 else
@@ -3686,7 +3685,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
 
                     this.calNumRecs++;
                     calibrationHistory.setNumRecs(this.calNumRecs);
-                    calibrationHistory.handleRecordRead(0, readValue); 
+                    calibrationHistory.handleRecordRead(0, decodedValue); 
                 }
             }            
             else if (myArray.length == 2)
