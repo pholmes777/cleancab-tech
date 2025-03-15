@@ -2038,7 +2038,7 @@ class historyClass
         if (this.id == id &&
             this.readState > 0)
         {
-            bleiface.setMessage(DBG_INFO, "History " + this.name + ": Received. Len=" + data.length);
+            bleiface.setMessage(DBG_INFO, "History " + this.name + ": Received. Len=" + data.length + ", state=" + this.readState);
 
             if (this.readState == 1)
             {
@@ -3166,8 +3166,8 @@ class calibrationHistoryClass extends historyClass
 
     dataValid(data)
     {
-    bleiface.setMessage(DBG_INFO, "check valid: " + doDecode(data).length);
-        return doDecode(data).length >= 6;
+    bleiface.setMessage(DBG_INFO, "check valid: " + this.doDecode(data).length);
+        return this.doDecode(data).length >= 6;
     }
     
     dataRecordNumber(data)
@@ -3190,7 +3190,7 @@ class calibrationHistoryClass extends historyClass
     
     dataAddToFileData(data)
     {
-        const myArray = doDecode(data);
+        const myArray = this.doDecode(data);
         
         this.fileData  += this.dataDate(data) + "," +
                           this.dataRecordType(data) + "," +
@@ -3200,7 +3200,7 @@ class calibrationHistoryClass extends historyClass
     
     dataAddDetailElements(detailsDiv, data)
     {               
-        const myArray = doDecode(data);
+        const myArray = this.doDecode(data);
         
         this.addRowElement(detailsDiv, "Name", myArray[4]);
         this.addRowElement(detailsDiv, "Contact", myArray[5]);
@@ -3208,7 +3208,7 @@ class calibrationHistoryClass extends historyClass
     
     dataDate(data)
     {
-        const myDate = doDecode(data)[3].split("-");
+        const myDate = this.doDecode(data)[3].split("-");
         
         if (myDate.length >= 3)
         {
@@ -3219,7 +3219,7 @@ class calibrationHistoryClass extends historyClass
     
     dataRecordType(data)
     {
-        return doDecode(data)[3]; // the company
+        return this.doDecode(data)[3]; // the company
     }
 }
 
