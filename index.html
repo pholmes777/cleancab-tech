@@ -3694,7 +3694,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
                 // CC|- is no current Calibration
                 // Cx|- is no calibration at that position
                 
-                if (myArray[0] === "CC" &&
+                if (myArray[0] === "Cc" &&
                     myArray[1] === "-")
                 {
                     this.currentCalibrationIdx = 0;
@@ -3713,7 +3713,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
             {
                 // CC|id|date|name|company|phone|hours is the current calibration record
                 
-                if (myArray[0] === "CC")
+                if (myArray[0] === "Cc")
                 {
                     this.currentCalibrationIdx = parseInt(myArray[1]);
                     
