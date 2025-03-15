@@ -3575,6 +3575,7 @@ class blueToothCommission extends blueToothIf
             this.retries = 0;
             
             let req = nextId.toString();
+bleiface.setMessage(DBG_INFO, this.getName() + " req=" + req);
             
             const encodedValue = new TextEncoder().encode(req);    
             
@@ -3660,7 +3661,8 @@ class blueToothCommission extends blueToothIf
                      (myArray[0][1] >= '1' && myArray[0][1] <= '8'))
             {
                 // handle history Reading
-                
+
+bleiface.setMessage(DBG_INFO, this.getName() + " Got:" + decodedValue + ", id=" + this.calReadId);                
                 calibrationHistory.setRec(this.calReadId);
                 
                 this.requestNextCalRecord();
@@ -3668,6 +3670,8 @@ class blueToothCommission extends blueToothIf
                 if (myArray[1] === "-")                
                 {
                     // invalid calibration record
+
+bleiface.setMessage(DBG_INFO, this.getName() + " Invalid");                
 
                     if (this.calReadId == 0)
                     {
@@ -3677,6 +3681,8 @@ class blueToothCommission extends blueToothIf
                 else
                 {
                     // calibration record is valid so handle it
+
+bleiface.setMessage(DBG_INFO, this.getName() + " Valid");                
 
                     this.calNumRecs++;
                     calibrationHistory.setNumRecs(this.calNumRecs);
