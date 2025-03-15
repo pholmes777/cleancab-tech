@@ -3548,7 +3548,11 @@ class blueToothCommission extends blueToothIf
             }
             this.retries = 0;
             
-            const encodedValue = new TextEncoder().encode(nextId.toString());    
+            let req = nextId.toString();
+            
+            const encodedValue = new TextEncoder().encode(req);    
+
+bleiface.setMessage(DBG_INFO, "Calrequest: Data=" + req);
             
             this.write(encodedValue);
                     
@@ -3582,7 +3586,7 @@ class blueToothCommission extends blueToothIf
     
         const decodedValue = new TextDecoder().decode(readValue);
 
-bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
+//bleiface.setMessage(DBG_INFO, "Calread: Data=" + decodedValue);
 
         const myArray = decodedValue.split("|");
     
