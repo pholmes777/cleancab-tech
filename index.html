@@ -3675,7 +3675,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Invalid");
 
                     if (this.calReadId == 0)
                     {
-                        calibrationHistory.handleRecordRead(id, readValue);
+                        calibrationHistory.handleRecordRead(0, readValue);
                     }
                 }
                 else
@@ -3686,7 +3686,7 @@ bleiface.setMessage(DBG_INFO, this.getName() + " Valid");
 
                     this.calNumRecs++;
                     calibrationHistory.setNumRecs(this.calNumRecs);
-                    calibrationHistory.handleRecordRead(id, readValue); 
+                    calibrationHistory.handleRecordRead(0, readValue); 
                 }
             }            
             else if (myArray.length == 2)
