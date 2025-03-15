@@ -3220,6 +3220,7 @@ class blueToothCommission extends blueToothIf
         this.sendCal = false;
         this.sendValue = "";
         this.calibrateMenuItem = 0;
+        this.calibrateHistoryMenuItem = 0;
         this.elementMenuItem = document.getElementById("menuItemLogin");
         this.allowCalibration = false;
         this.allowCommission = false;
@@ -3259,6 +3260,11 @@ class blueToothCommission extends blueToothIf
             this.calibrateMenuItem.remove();
             this.calibrateMenuItem = 0;
         }
+        if (this.calibrateHistoryMenuItem)
+        {
+            this.calibrateHistoryMenuItem.remove();
+            this.calibrateHistoryMenuItem = 0;
+        }
     }
     
     setCommission(commissionData)
@@ -3278,6 +3284,11 @@ class blueToothCommission extends blueToothIf
                 this.calibrateMenuItem.remove();
                 this.calibrateMenuItem = 0;
             }
+            if (this.calibrateHistoryMenuItem)
+            {
+                this.calibrateHistoryMenuItem.remove();
+                this.calibrateHistoryMenuItem = 0;
+            }
         }
         else
         {
@@ -3288,6 +3299,14 @@ class blueToothCommission extends blueToothIf
                 this.calibrateMenuItem.innerHTML = "Calibrate";
                 
                 this.elementMenuItem.parentNode.insertBefore(this.calibrateMenuItem, this.elementMenuItem.nextSibling); 
+            }
+            if (!this.calibrateHistoryMenuItem)
+            {
+                this.calibrateHistoryMenuItem = document.createElement("a");
+                this.calibrateHistoryMenuItem.setAttribute("href", "javascript:showDiv('calibrationHistoryDiv')");
+                this.calibrateHistoryMenuItem.innerHTML = "Calibrate History";
+                
+                this.elementMenuItem.parentNode.insertBefore(this.calibrateHistoryMenuItem, this.elementMenuItem.nextSibling);             
             }
         }
     }
