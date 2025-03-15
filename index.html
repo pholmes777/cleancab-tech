@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>CleanCab App</title>
+    <title>CleanCab-Tech App</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="styleph.css">
     <link rel="manifest" href="manifest.json">
@@ -15,21 +15,24 @@
 
 <!-- Top Navigation Menu -->
 <div class="topnav">
-  <a href="javascript:showDiv('connectingDiv')" class="active">CleanCab</a>
+  <a href="javascript:showDiv('connectingDiv')" class="active">CleanCab-Tech</a>
   <div id="idleLinks">
     <a href="javascript:connect()">Connect</a>
+    <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
   </div>
   
   <div id="connectedLinks">
     <a href="javascript:disconnect()">Disconnect</a>
     <a id="menuItemLogin" href="javascript:showDiv('loginDiv')">Login</a>
+    <a href="javascript:showDiv('manageDiv')">Management</a>
     <a href="javascript:showDiv('statusDiv')">Status</a>
     <a href="javascript:showDiv('status1Div')">Running Times</a>
     <a href="javascript:showDiv('commissionDiv')">Commission</a>
     <a href="javascript:showDiv('alarmHistoryDiv')">Alarm History</a>
     <a href="javascript:showDiv('filterDetailsDiv')">Filter Details</a>
     <a href="javascript:showDiv('filterHistoryDiv')">Filter History</a>
+    <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
   </div>
   <a href="javascript:void(0);" class="icon" onclick="toggleMenu()">
@@ -488,8 +491,19 @@
           <input type="text" id="cPlantHours" maxlength="9" readonly value="">
         </div>
       </div>
-      <div class="row" id="cSaveRow" style="display:none;">
-        <input type="submit" value="Save" class="btn">
+      <div class="row">
+        <div class="col-25">
+        </div>
+        <div class="col-30">
+        </div>
+        <div class="col-20">
+          <input id="commissionCancelBtn" type="button" value="Cancel" onclick="commissionBtnClick(0)" disabled="true">
+        </div>        
+        <div class="col-5">
+        </div>
+        <div class="col-20">
+          <input id="commissionSaveBtn" type="button" value="Update" onclick="commissionBtnClick(1)" disabled="true">
+        </div>
       </div>
     </form>
     <div class="row">
@@ -498,9 +512,53 @@
       </div>
       <div class="col-75">
         <label class="switch">
-          <input id="testModeCheckbox" type="checkbox" onclick="testModeClicked()">
+          <input id="testModeCheckbox" type="checkbox" onclick="testModeClicked(0)">
           <span class="slider round"></span>
         </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="manageDiv" class="hiddenitemdiv">
+  <h3>General Management</h3>
+  <div class="container">
+    <h3>Leak Management</h3>
+    <div class="container">
+      <div class="row">
+        <div class="col-25">
+          <label>Check for leaks</label>
+        </div>
+        <div class="col-75">
+          <label class="switch">
+            <input id="testMode1Checkbox" type="checkbox" onclick="testModeClicked(1)">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </div>          
+    <h3>Log Management</h3>
+    <div class="container">
+      <div class="row">
+        <div class="col-25">
+        </div>
+        <div class="col-65">
+          <input type="button" value="Erase Filter Log" onclick="eraseLog(0)">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-25">
+        </div>
+        <div class="col-65">
+          <input type="button" value="Erase Alarm Log" onclick="eraseLog(1)">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-25">
+        </div>
+        <div class="col-65">
+          <input type="button" value="Erase Running Counts" onclick="eraseLog(2)">
+        </div>
       </div>
     </div>
   </div>
@@ -564,31 +622,6 @@
       </div>
     </div>
   </div>
-  
-  <h3>Log Management</h3>
-  <div class="container">
-    <div class="row">
-      <div class="col-25">
-      </div>
-      <div class="col-65">
-        <input type="button" value="Erase Filter Log" onclick="eraseLog(0)">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-25">
-      </div>
-      <div class="col-65">
-        <input type="button" value="Erase Alarm Log" onclick="eraseLog(1)">
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-25">
-      </div>
-      <div class="col-65">
-        <input type="button" value="Erase Running Counts" onclick="eraseLog(2)">
-      </div>
-    </div>
-  </div>
 </div>
 
 <div id="calibrateDivP2" class="hiddenitemdiv">
@@ -631,12 +664,22 @@
             <input type="text" id="cCalibrationPhone" maxlength="19" readonly value="">
           </div>
         </div>
-        <div class="row"  id="cCalibrationSaveRow" style="display:none;">
+        <div class="row">
           <div class="col-25">
             <label></label>  
+          </div>          
+          <div class="col-20">
+            <input id="calStartBtn" type="button" value="Start" onclick="calBtnClicked(1)">
           </div>
-          <div class="col-65">
-            <input type="submit" value="Save" class="btn">
+          <div class="col-2">
+          </div>
+          <div class="col-20">
+            <input id="calCancelBtn" type="button" value="Cancel" onclick="calBtnClicked(0)" disabled="true">
+          </div>
+          <div class="col-2">
+          </div>
+          <div class="col-20">
+            <input id="calFinishBtn" type="button" value="Finish" onclick="calBtnClicked(2)" disabled="true">
           </div>
         </div>        
       </form>
@@ -712,31 +755,68 @@
       </form>
     </div>
   </div>
-  
-  <div id="calibrateLogDivP2" class="hiddenitemdiv">
-    <h3>Log Management</h3>
-    <div class="container">
+</div>
+
+<div id="techDiv" class="hiddenitemdiv">   
+  <h3>Registered Details</h3>
+  <div class="container">
+    <form id="techForm">
       <div class="row">
         <div class="col-25">
+          <label>Company</label>
         </div>
-        <div class="col-65">
-          <input type="button" value="Erase Filter Log" onclick="testEraseLog(0)">
+        <div class="col-75">
+          <input type="text" id="techInstallerCompany" maxlength="99" readonly value="">
         </div>
       </div>
       <div class="row">
         <div class="col-25">
+          <label>Installer Name</label>
         </div>
-        <div class="col-65">
-          <input type="button" value="Erase Alarm Log" onclick="testEraseLog(1)">
+        <div class="col-75">
+          <input type="text" id="techInstallerName" maxlength="99" readonly value="">
         </div>
       </div>
       <div class="row">
         <div class="col-25">
+          <label>Phone</label>  
         </div>
-        <div class="col-65">
-          <input type="button" value="Erase Running Counts" onclick="testEraseLog(2)">
+        <div class="col-75">
+          <input type="text" id="techInstallerPhone" maxlength="19" readonly value="">
         </div>
       </div>
+      <div class="row">
+        <div class="col-25">
+          <label>Email</label>  
+        </div>
+        <div class="col-75">
+          <input type="text" id="techInstallerEmail" maxlength="19" readonly value="">
+        </div>
+      </div>      
+      <div class="row">
+        <div class="col-25">
+        </div>
+        <div class="col-30">
+        </div>
+        <div class="col-20">
+            <input id="techCancel" type="button" value="Cancel" onclick="techCancelClicked()" disabled="true">
+        </div>
+        <div class="col-5">
+        </div>
+        <div class="col-20">
+            <input id="techUpdate" type="button" value="Update" onclick="techUpdateClicked()">
+        </div>
+      </div>
+    </form> 
+  </div>
+  </br></br>
+  <div>
+    <div class="row">
+      <div class="col-20">
+      </div>
+      <div class="col-60">
+        <input id="connectBtn" type="button" value="Connect" onclick="connectBtnClicked()">
+      </div>   
     </div>
   </div>
 </div>
@@ -932,7 +1012,13 @@
         </div>
       </div> 
       <div class="row">
-        <input id="settingSaveBtn" type="submit" value="Save Settings" class="btn">
+        <div class="col-40">
+        </div>
+        <div class="col-5">
+        </div>
+        <div class="col-50">
+          <input id="settingSaveBtn" type="submit" value="Save Settings" class="btn">
+        </div>
       </div>
     </form> 
   </div>
@@ -1332,6 +1418,93 @@ var menuDisabled=false;
 //    phdbg.innerHTML = "";
 //}
 
+var registerMode = 99;
+const cTechInstallerCompany = document.querySelector("#techInstallerCompany");
+const cTechInstallerName = document.querySelector("#techInstallerName");
+const cTechInstallerPhone = document.querySelector("#techInstallerPhone");
+const cTechInstallerEmail = document.querySelector("#techInstallerEmail");
+const cTechUpdateBtn = document.querySelector("#techUpdate");
+const cTechCancelBtn = document.querySelector("#techCancel");
+
+function techEnableFields(enable)
+{
+    cTechInstallerCompany.readOnly = !enable;
+    cTechInstallerName.readOnly = !enable;
+    cTechInstallerPhone.readOnly = !enable;
+    cTechInstallerEmail.readOnly = !enable;
+}
+
+function techLoadFields()
+{
+    cTechInstallerCompany.value = localStorage.getItem("icompany");
+    cTechInstallerName.value = localStorage.getItem("iname");
+    cTechInstallerPhone.value = localStorage.getItem("iphone");
+    cTechInstallerEmail.value = localStorage.getItem("iemail");
+}
+
+function techSaveFields()
+{
+    localStorage.setItem("icompany", cTechInstallerCompany.value);
+    localStorage.setItem("iname", cTechInstallerName.value);
+    localStorage.setItem("iphone", cTechInstallerPhone.value);
+    cTechInstallerEmail.setItem("iemail", cTechInstallerEmail.value);
+    localStorage.setItem("cleancab", "1");
+}
+
+function techSetMode(mode)
+{
+    if (registerMode != mode)
+    {
+        registerMode = mode;
+        if (mode == 1 || mode == 2)
+        {
+            cTechUpdateBtn.value="Save";
+            techEnableFields(true);
+        }
+        else
+        {
+            cTechUpdateBtn.value="Update";
+            techEnableFields(false);
+        }
+        cTechCancelBtn.disabled = (mode != 2);
+    }
+}
+
+function techShow()
+{
+    if (localStorage.getItem("cleancab") === null)
+    {
+        techSetMode(1);      
+    }
+    else
+    {
+        techSetMode(0);
+        techLoadFields();
+    }
+}
+
+function techUpdateClicked()
+{
+    if (registerMode == 1 || registerMode == 2)
+    {
+        techSaveFields();
+        techSetMode(0);
+    }
+    else
+    {
+        techSetMode(2);
+    }
+}
+
+function techCancelClicked()
+{
+    if (registerMode == 2)
+    {
+        techSetMode(0);
+        techLoadFields();
+    }   
+}
+
 const DBG_INFO = 0;
 const DBG_CONNECT = 1;
 const DBG_DEBUG = 2;
@@ -1354,8 +1527,8 @@ function init()
     selectDisplay = "";
 
     //testing lines
-    //activeLinks = "idleLinks";
-    activeLinks = "connectedLinks";
+    activeLinks = "idleLinks";
+    //activeLinks = "connectedLinks";
     // testing lines end
     
     filterHistory = new filterHistoryClass("filter", "Filter");
@@ -1365,13 +1538,16 @@ function init()
     testControl = new testClass();
 
     // testing lines... removed \/
-    //onDisconnected();
-    protocolVersion = 2;
-    authorizeControl.setAuthorized(true);
-    bleiface.protocolVersionSet();
+    onDisconnected();
+    //protocolVersion = 2;
+    //authorizeControl.setAuthorized(true);
+    //bleiface.protocolVersionSet();
+    //showDiv("techDiv");
     // testing lines end
     
     setTimeout(secondTimer, 500);
+    
+    techShow();
 }
 
 //=====================================================
@@ -2098,6 +2274,7 @@ class blueToothIf
 // Variables
 
 var testSwitch = document.querySelector("#testModeCheckbox");
+var test1Switch = document.querySelector("#testMode1Checkbox");
 var testPressureForm = document.querySelector("#testPressureForm");
 var testCO2Form = document.querySelector("#testCO2Form");
 
@@ -2117,11 +2294,11 @@ testCO2Form.addEventListener("submit", (event) =>
 
 // Callback events
 
-function testModeClicked()
+function testModeClicked(id)
 {
     if (testControl)
-    {
-        testControl.setTestState(testSwitch.checked);
+    {        
+        testControl.setTestState(id == 0 ? testSwitch.checked : test1Switch.checked);
     }
 }
 
@@ -2253,6 +2430,12 @@ class testClass
         this.send_req = true;
         
         bleiface.setMessage(DBG_INFO, "Sending calibrate: Cmd=" + this.send_cmd + ", Value=" + this.send_value);
+        
+        var item = bleiface.getItem("Commission");
+        if (item)
+        {        
+            item.calibrationChanged();
+        }
     }
     
     executeEraseLog(theLog)
@@ -2267,6 +2450,14 @@ class testClass
     
     setTestState(on)
     {
+        if (testSwitch.checked != on)
+        {
+            testSwitch.checked = on;
+        }
+        if (test1Switch.checked != on)
+        {
+            test1Switch.checked = on;
+        }
         this.send_req = false;
         this.send_cmd = 0;
         this.send_value = on ? 1 : 0;
@@ -2832,8 +3023,6 @@ class blueToothRtc extends blueToothIf
 
 // variables
 
-var   commissionDataValid = false;
-const commissionForm = document.querySelector("#commissionForm");
 const cInstalledDate = document.querySelector("#cInstalledDate");
 const cInstallerCompany = document.querySelector("#cInstallerCompany");
 const cInstallerName = document.querySelector("#cInstallerName");
@@ -2841,113 +3030,59 @@ const cInstallerPhone = document.querySelector("#cInstallerPhone");
 const cMachineName = document.querySelector("#cMachineName");
 const cPlantNumber = document.querySelector("#cPlantNumber");
 const cPlantHours = document.querySelector("#cPlantHours");
-const cSaveRow = document.querySelector("#cSaveRow");
 
-const calibrationUserForm = document.querySelector("#calibrationUserForm");
 const cCalibrateDivP2 = document.querySelector("#calibrateDivP2");
 const cCalibrateSetDivP2 = document.querySelector("#calibrateSetDivP2");
-const cCalibrateLogDivP2 = document.querySelector("#calibrateLogDivP2");
 const cCalibrationDate = document.querySelector("#cCalibrationDate");
 const cCalibrationCompany = document.querySelector("#cCalibrationCompany");
 const cCalibrationName = document.querySelector("#cCalibrationName");
 const cCalibrationPhone = document.querySelector("#cCalibrationPhone");
-const cCalibrationSaveRow = document.querySelector("#cCalibrationSaveRow");
+
+const cCalStartBtn = document.querySelector("#calStartBtn");
+const cCalCancelBtn = document.querySelector("#calCancelBtn");
+const cCalFinishBtn = document.querySelector("#calFinishBtn");
+
+const cCommissionCancelBtn = document.querySelector("#commissionCancelBtn");
+const cCommissionSaveBtn = document.querySelector("#commissionSaveBtn");
 
 // Callback events
 
-commissionForm.addEventListener("submit", (event) => 
+function commissionBtnClick(action)
 {
-    event.preventDefault();
-  
-    var cdata = cInstalledDate.value + "|" +
-                cInstallerName.value + "|" +
-                cInstallerPhone.value + "|" +
-                cInstallerCompany.value + "|" +
-                cMachineName.value + "|" +
-                cPlantNumber.value + '|' +
-                cPlantHours.value;
-
     var item = bleiface.getItem("Commission");
     if (item)
     {
-        item.setCommission(cdata);
+        item.commissionClicked(action);
     }
-});
+}
 
-calibrationUserForm.addEventListener("submit", (event) => 
+function calBtnClicked(action)
 {
-    cCalibrationDate.value = getNowDateForInput();
-    
-    event.preventDefault();  
-    
-    var cdata = cCalibrationDate.value + "|" +
-                cCalibrationCompany.value + "|" +
-                cCalibrationName.value + "|" +
-                cCalibrationPhone.value;
-
     var item = bleiface.getItem("Commission");
     if (item)
     {
-        item.setCalibration(cdata);
-        
-        // now calibration record was written can enable the calibration items
-        
-        cCalibrateSetDivP2.style.display = "block";
+        item.calibrationClicked(action);
     }
-});
+}
 
 // helper functions
 
-function authorizeCalibration(protocolVer)
+function authorizeCalibration()
 {
-    if (protocolVer < 2)
-    {
-        cCalibrateSetDivP2.style.display = "none";
-        cCalibrateDivP2.style.display = "none";
-    }
-    else
-    {    
-        let allowed = true;
-        
-        if (authorizeControl &&
-            authorizeControl.getAuthorized())
-        {
-            cCalibrateLogDivP2.style.display = "block";
-            //cCalibrateSetDivP2.style.display = "block";
-        }
-        else
-        {
-            allowed = false;
-            cCalibrateLogDivP2.style.display = "none";
-            cCalibrateSetDivP2.style.display = "none";
-        }
-        cCalibrationName.readOnly = !allowed;
-        cCalibrationPhone.readOnly = !allowed;
-        cCalibrationCompany.readOnly = !allowed;
-        cCalibrationSaveRow.style.display = (!allowed) ? "none" : "block";
+    var item = bleiface.getItem("Commission");
+    if (item)
+    {        
+        item.setEnableCalibration();
     }
 }
 
 function authorizeCommission()
 {
-    let allowed = true;
-    
-    if (commissionDataValid)
-    {
-        allowed = false;
-        if (authorizeControl &&
-            authorizeControl.getAuthorized())
-        {
-            allowed = true;
-        }
+    var item = bleiface.getItem("Commission");
+    if (item)
+    {        
+        item.setEnableCommission();
     }
-    cSaveRow.style.display = (!allowed) ? "none" : "block";
-    cInstallerName.readOnly = !allowed;
-    cInstallerPhone.readOnly = !allowed;
-    cInstallerCompany.readOnly = !allowed;
-    cMachineName.readOnly = !allowed;
-    cPlantNumber.readOnly = !allowed;
-    cPlantHours.readOnly = !allowed;
 }
 
 // bluetooth interface class
@@ -2963,12 +3098,30 @@ class blueToothCommission extends blueToothIf
         this.sendValue = "";
         this.calibrateMenuItem = 0;
         this.elementMenuItem = document.getElementById("menuItemLogin");
+        this.allowCalibration = false;
+        this.allowCommission = false;
+        
+        this.savedCalibrationName = "";
+        this.savedCalibrationPhone = "";
+        this.savedCalibrationCompany = "";
+        this.savedCalibrationDate = "";
+        
+        this.savedInstalledDate = "";
+        this.savedInstallerName = "";
+        this.savedInstallerPhone = "";
+        this.savedInstallerCompany = "";
+        this.savedMachineName = "";
+        this.savedPlantNumber = "";
+        this.savedPlantHours = "";
+        
+        this.commissionDataValid = false;
     }
-
+        
     disconnected()
     {
         super.disconnected();
         
+        this.commissionDataValid = false;
         this.send = false;
         this.sendCal = false;
         if (this.calibrateMenuItem)
@@ -2982,13 +3135,6 @@ class blueToothCommission extends blueToothIf
     {
         this.sendCal = false;
         this.sendValue = commissionData;
-        this.send = true;
-    }
-    
-    setCalibration(calibrationData)
-    {
-        this.sendCal = true;
-        this.sendValue = calibrationData;
         this.send = true;
     }
     
@@ -3016,17 +3162,230 @@ class blueToothCommission extends blueToothIf
         }
     }
     
+    commissionClicked(action)
+    {
+        var allowed = false;
+        
+        if (action == 0)
+        {
+            // cancel button clicked
+        
+            cCommissionCancelBtn.disabled = true;
+            cCommissionSaveBtn.disabled = !(this.allowCommission | !this.commissionDataValid);
+            cCommissionSaveBtn.value = "Update";
+            
+            cInstalledDate.value = this.savedInstalledDate;
+            cInstallerName.value = this.savedInstallerName;
+            cInstallerPhone.value = this.savedInstallerPhone;
+            cInstallerCompany.value = this.savedInstallerCompany;
+            cMachineName.value = this.savedMachineName;
+            cPlantNumber.value = this.savedPlantNumber;
+            cPlantHours.value = this.savedPlantHours;                
+        }
+        else if (action == 1)
+        {
+            // save or update button clicked
+        
+            if (cCommissionSaveBtn.value === "Save")
+            {
+                this.sendCal = false;
+                this.sendValue = cInstalledDate.value + "|" +
+                cInstallerName.value + "|" +
+                cInstallerPhone.value + "|" +
+                cInstallerCompany.value + "|" +
+                cMachineName.value + "|" +
+                cPlantNumber.value + '|' +
+                cPlantHours.value;
+                this.send = true;
+                
+                this.savedInstalledDate = cInstalledDate.value;
+                this.savedInstallerName = cInstallerName.value;
+                this.savedInstallerPhone = cInstallerPhone.value;
+                this.savedInstallerCompany = cInstallerCompany.value;
+                this.savedMachineName = cMachineName.value;
+                this.savedPlantNumber = cPlantNumber.value;
+                this.savedPlantHours = cPlantHours.value;
+            
+                this.commissionDataValid =  true;
+                
+                cCommissionSaveBtn.value = "Update";
+                cCommissionCancelBtn.disabled = true;
+                cCommissionSaveBtn.disabled = !(this.allowCommission | !this.commissionDataValid);
+            }
+            else
+            {
+                // start Update
+            
+                cCommissionSaveBtn.value = "Save";
+                cCommissionCancelBtn.disabled = false;
+                
+                cInstalledDate.value = getNowDateForInput();
+                cInstallerName.value = localStorage.getItem("iname");
+                cInstallerCompany.value = localStorage.getItem("icompany");
+                cInstallerPhone.value = localStorage.getItem("iphone");
+                
+                allowed = true;
+            }
+        }
+        cInstallerName.readOnly = !allowed;
+        cInstallerPhone.readOnly = !allowed;
+        cInstallerCompany.readOnly = !allowed;
+        cMachineName.readOnly = !allowed;
+        cPlantNumber.readOnly = !allowed;
+        cPlantHours.readOnly = !allowed;
+    }
+    
+    setEnableCommission()
+    {
+        this.allowCommission = false;
+        if (authorizeControl &&
+            authorizeControl.getAuthorized())
+        {
+            this.allowCommission = true;
+        }
+        if (this.allowCommission || !this.commissionDataValid)
+        {
+            cCommissionSaveBtn.disabled = false;
+        }
+        else
+        {
+            if (!cCommissionCancelBtn.disabled)
+            {
+                commissionClicked(0);
+            }
+        }
+    }
+
+    setEnableCalibration()
+    {
+        this.allowCalibration = false;
+        
+        if (authorizeControl &&
+            authorizeControl.getAuthorized())
+        {
+            this.allowCalibration = true;
+        }
+        
+        if (protocolVersion < 2)
+        {
+            cCalibrateSetDivP2.style.display = "none";
+            cCalibrateDivP2.style.display = "none";
+        }
+        else
+        {
+            if (this.allowCalibration)
+            {
+                if (cCalStartBtn.disabled &&
+                    cCalCancelBtn.disabled &&
+                    cCalFinishBtn.disabled)
+                {
+                    // enable the calibration start button
+                
+                    cCalStartBtn.disabled = false;
+                }
+            }
+            else
+            {
+                if (!cCalStartBtn.disabled)
+                {
+                    // calibration not started so just disable it
+                
+                    cCalStartBtn.disabled = true;
+                }
+                else
+                {
+                    if (!cCalCancelBtn.disabled)
+                    {
+                        // calibration can still be canceled
+                    
+                        calibrationClicked(0);
+                    }
+                    else
+                    {
+                        // don't do anything they are calibrating still.
+                    }
+                }
+            }
+        }
+    }
+    
+    calibrationChanged()
+    {
+        if (!cCalCancelBtn.disabled)
+        {
+            cCalCancelBtn.disabled = true;
+            cCalFinishBtn.disabled = false;
+        }
+    }
+    
+    calibrationClicked(action)
+    {
+        switch(action)
+        {
+            case 0:     // cancel calibration
+                // need to restore the old Value
+            
+                cCalStartBtn.disabled = !this.allowCalibration;
+                cCalCancelBtn.disabled = true;
+                cCalFinishBtn.disabled = true;
+                cCalibrateSetDivP2.style.display = "none";
+                cCalibrationName.value = this.savedCalibrationName;
+                cCalibrationPhone.value = this.savedCalibrationPhone;
+                cCalibrationCompany.value = this.savedCalibrationCompany;
+                cCalibrationDate.value = this.savedCalibrationDate;
+            break;
+        
+            case 1:
+                // start the calibration process
+                
+                cCalibrationDate.value = getNowDateForInput();
+                cCalibrationName.readOnly = false;
+                cCalibrationPhone.readOnly = false;
+                cCalibrationCompany.readOnly = false;
+                
+                cCalibrationName.value = localStorage.getItem("iname");
+                cCalibrationCompany.value = localStorage.getItem("icompany");
+                cCalibrationPhone.value = localStorage.getItem("iphone");
+                
+                cCalCancelBtn.disabled = false;
+                cCalStartBtn.disabled = true;
+                cCalFinishBtn.disabled = true;
+                
+                cCalibrateSetDivP2.style.display = "block";
+            break;
+        
+            case 2:
+                // calibration done
+
+                this.savedCalibrationCompany = cCalibrationCompany.value;
+                this.savedCalibrationName = cCalibrationName.value;
+                this.savedCalibrationPhone = cCalibrationPhone.value;
+                this.savedCalibrationDate = cCalibrationDate.value;
+
+                this.sendCal = true;
+                this.sendValue = cCalibrationDate.value + "|" +
+                    cCalibrationCompany.value + "|" +
+                    cCalibrationName.value + "|" +
+                    cCalibrationPhone.value;
+                this.send = true;
+        
+                cCalibrateSetDivP2.style.display = "none";   
+
+                cCalStartBtn.disabled = !this.allowCalibration;      
+                cCalFinishBtn.disabled = true;  
+                cCalCancelBtn.disabled = true;                
+            break;
+        }
+    }
+    
     setRead(readValue)
     {
         super.setRead(readValue);
-        
-        commissionDataValid = false;
     
         const decodedValue = new TextDecoder().decode(readValue);
 
         const myArray = decodedValue.split("|");
     
-        cSaveRow.style.display = "none";
         if ((myArray.length >= 7 && protocolVersion < 2) ||
             (myArray.length >= 8 && protocolVersion >= 2))
         {
@@ -3044,6 +3403,13 @@ class blueToothCommission extends blueToothIf
             {
                 cPlantHours.value = "";
             }
+            this.savedInstalledDate = cInstalledDate.value;
+            this.savedInstallerName = cInstallerName.value;
+            this.savedInstallerPhone = cInstallerPhone.value;
+            this.savedInstallerCompany = cInstallerCompany.value;
+            this.savedMachineName = cMachineName.value;
+            this.savedPlantNumber = cPlantNumber.value;
+            this.savedPlantHours = cPlantHours.value;            
 
             commissionDataValid = (myArray[0] === "V");    
         }        
@@ -3065,6 +3431,11 @@ class blueToothCommission extends blueToothIf
                     cCalibrationName.value = "";
                     cCalibrationCompany.value = "";
                     cCalibrationPhone.value = "";
+                                                        
+                    this.savedCalibrationName = cCalibrationName.value;
+                    this.savedCalibrationPhone = cCalibrationPhone.value;
+                    this.savedCalibrationCompany = cCalibrationCompany.value;
+                    this.savedCalibrationDate = cCalibrationDate.value;
                 }
             }
             else if (myArray.length == 7)
@@ -3074,14 +3445,21 @@ class blueToothCommission extends blueToothIf
                 cCalibrationDate.value = myArray[2]
                 cCalibrationCompany.value = myArray[3];
                 cCalibrationName.value = myArray[4];
-                cCalibrationPhone.value = myArray[5];                
+                cCalibrationPhone.value = myArray[5];  
+
+                this.savedCalibrationName = cCalibrationName.value;
+                this.savedCalibrationPhone = cCalibrationPhone.value;
+                this.savedCalibrationCompany = cCalibrationCompany.value;
+                this.savedCalibrationDate = cCalibrationDate.value;                
             }
         }
-        if (!commissionDataValid)
+        if (!this.commissionDataValid)
         {
             cInstalledDate.value = getNowDateForInput();
+            this.savedInstalledDate = cInstalledDate.value;
         }
         authorizeCommission();
+        authorizeCalibration();
     }
     
     init()
@@ -4108,7 +4486,7 @@ class authorizeClass
             this.elementPassword.readOnly = authorized;
         }
         authorizeCommission();
-        authorizeCalibration(protocolVersion);
+        authorizeCalibration();
     }
 
     processData(data)
@@ -4497,6 +4875,7 @@ class blueToothDevice
     
     start()
     {
+        this.msg = "";
         connectingState.innerHTML = "";
         this.tickCount = 0;
         connectingTicks.innerHTML = "0";
@@ -4556,7 +4935,8 @@ class blueToothDevice
                 menuHide();
                 activeLinks = "connectedLinks";
 
-                if (selectDisplay === "connectingDiv")
+                if (selectDisplay === "connectingDiv" ||
+                    selectDisplay === "techDiv")
                 {
                     showDiv("statusDiv");
                 }                
@@ -4622,6 +5002,11 @@ class blueToothDevice
         this.getItem(name).setCharactistic(characteristic);
     }        
     
+    clearMessage()
+    {
+        this.msg = "";
+    }
+    
     setMessage(msgType, msg)
     {
         this.msg = msg;
@@ -4636,7 +5021,7 @@ class blueToothDevice
             break;
 
             case DBG_ERROR:
-                connectingError.innerHTML += "<br>" + msg;
+                connectingState.innerHTML += "<br>" + msg;
             break;            
         }
     }
@@ -4739,10 +5124,13 @@ function isWebBluetoothEnabled()
    
 function connectToBluetooth()
 {
+    bleiface.clearMessage();
     bleiface.disconnected();
     if (isWebBluetoothEnabled())
     {
         menuDisabled=true;
+        cConnectBtn.disabled = true;
+        
         navigator.bluetooth.requestDevice({
             filters: [{name: 'CLEANCAB'}],
             optionalServices: [bleiface.getServiceUUID(0), bleiface.getServiceUUID(1)]
@@ -4897,11 +5285,14 @@ function connectToBluetooth()
             
             bleiface.setMessage(DBG_CONNECT, "Reading done. Initializing...");        
             menuDisabled=false;            
+            cConnectBtn.disabled = false;
             return bleiface.done();
         })
         .catch(error =>
         {
             menuDisabled=false;
+            cConnectBtn.disabled = false;
+            cConnectBtn.value = "Connect";
             bleiface.setError(error);        
         });
     }
@@ -4911,20 +5302,39 @@ function onDisconnected(event)
 {
   menuHide();
   activeLinks = "idleLinks";
-  showDiv("connectingDiv");
+  showDiv("techDiv");
   connectingState.innerHTML = "Device disconnected";
+  cConnectBtn.value = "Connect";
+  
   //phdbg.innerHTML = "";
 }
+
+const cConnectBtn = document.querySelector("#connectBtn");
+
+function connectBtnClicked()
+{
+    if (cConnectBtn.value === "Connect")
+    {
+        connect();
+    }
+    else
+    {
+        disconnect();
+    }
+}   
 
 function connect()
 {
     if (isWebBluetoothEnabled())
     {
+        cConnectBtn.value = "Disconnect";
+        
         authorizeControl.restart();
         calibrateControl.restart();
         testControl.restart();
     
         testSwitch.checked = false;
+        test1Switch.checked = false;
  
         menuHide();
         showDiv("connectingDiv");
@@ -4952,9 +5362,11 @@ function connect()
 
 function disconnect()
 {
+    cConnectBtn.value = "Connect";
+    
     menuHide();
     activeLinks = "idleLinks";
-    showDiv("connectingDiv");
+    showDiv("techDiv");
     connectingState.innerHTML = "Device disconnected";
     bleiface.disconnect();
     //phdbg.innerHTML = "";
