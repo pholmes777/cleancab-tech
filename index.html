@@ -1440,13 +1440,13 @@ if ('serviceWorker' in navigator)
 //var phdbgc = 0;
 var menuDisabled=false;
 
-function phdbgClear()
-{
-    if (phdbg)
-    {
-        phdbg.innerHTML = "";
-    }
-}
+//function phdbgClear()
+//{
+//    if (phdbg)
+//    {
+//        phdbg.innerHTML = "";
+//    }
+//}
 
 var registerMode = 99;
 const cTechInstallerCompany = document.querySelector("#techInstallerCompany");
@@ -5327,10 +5327,10 @@ class blueToothDevice
             break;
 
             case DBG_INFO:
-                if (phdbg)
-                {
-                    phdbg.innerHTML += "<br>" + msg;
-                }
+                //if (phdbg)
+                //{
+                //    phdbg.innerHTML += "<br>" + msg;
+                //}
             break;
 
             case DBG_ERROR:
@@ -5619,10 +5619,10 @@ function onDisconnected(event)
   connectingState.innerHTML = "Device disconnected";
   cConnectBtn.value = "Connect";
   
-  if (phdbg)
-  {
-    phdbg.innerHTML = "";
-  }
+  //if (phdbg)
+  //{
+  //  phdbg.innerHTML = "";
+  //}
 }
 
 const cConnectBtn = document.querySelector("#connectBtn");
@@ -5685,10 +5685,10 @@ function disconnect()
     showDiv("techDiv");
     connectingState.innerHTML = "Device disconnected";
     bleiface.disconnect();
-    if (phdbg)
-    {
-        phdbg.innerHTML = "";
-    }
+    //if (phdbg)
+    //{
+    //    phdbg.innerHTML = "";
+    //}
 }
 
 function secondTimer()
