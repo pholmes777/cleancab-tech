@@ -5004,6 +5004,24 @@ class alarmHistoryClass extends historyClass
             }
             return "CO2 Idle";
         }
+        if (protocolVersion >= 2 && data.getUint8(1) >= 2)
+        {
+            if ((data.getUint8(20) & 0x80) == 0x80)
+            {
+                switch (data.getUint8(20) & 0x03)
+                {
+                    case 0x00:
+                        return "Buzzer Idle";
+                    case 0x01:
+                        return "Buzzer Active";
+                    case 0x03:
+                        return "Buzzer Muted";
+                    case 0x02:  // mute without a buzzer, just ignore
+                        break; 
+                }
+            }
+            return "Buzzer Idle";
+        }
         if ((data.getUint8(12) & 0x03) != 0)
         {
             return "Pressure Active";
