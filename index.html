@@ -4400,9 +4400,19 @@ function calibratePoint(thePoint)
 
 function eraseLog(theLog)
 {
-    if (calibrateControl)
+    if (protocolVersion >= 2)
     {
-        calibrateControl.executeEraseLog(theLog);
+        if (testControl)
+        {
+            testControl.executeEraseLog(theLog);
+        }
+    }
+    else
+    {
+        if (calibrateControl)
+        {
+            calibrateControl.executeEraseLog(theLog);
+        }
     }
 }
 
