@@ -5019,8 +5019,8 @@ class alarmHistoryClass extends historyClass
                     case 0x02:  // mute without a buzzer, just ignore
                         break; 
                 }
-            }
-            return "Buzzer Idle";
+                return "Buzzer Idle";
+            }            
         }
         if ((data.getUint8(12) & 0x03) != 0)
         {
