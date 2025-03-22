@@ -2346,14 +2346,6 @@ function testModeClicked(id)
     }
 }
 
-function testEraseLog(theLog)
-{
-    if (testControl)
-    {
-        testControl.executeEraseLog(theLog);
-    }
-}
-
 function testCalibratePoint(thePoint)
 {
     if (testControl)
@@ -5016,7 +5008,8 @@ class alarmHistoryClass extends historyClass
         }
         if (protocolVersion >= 2 && data.getUint8(1) >= 2)
         {
-            if ((data.getUint8(20) & 0x80) == 0x80)
+            if (data.getUint8(20) != 0xff &&
+                (data.getUint8(20) & 0x80) == 0x80)
             {
                 switch (data.getUint8(20) & 0x03)
                 {
