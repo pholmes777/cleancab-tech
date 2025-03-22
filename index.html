@@ -2440,12 +2440,14 @@ class testClass
                 this.deleteAlarm = false;
                 this.elementDbg.innerHTML = "Alarm Log Deleted";    
                 this.timer = 5;
+                alert("Alarm Log successfully erased");
             }
             if (this.deleteFilter && (data.getUint8(6) == 0))
             {
                 this.deleteFilter = false;
                 this.elementDbg.innerHTML = "Filter Log Deleted";    
                 this.timer = 5;
+                alert("Filter Log successfully erased");
             }
         }
     }   
@@ -2521,7 +2523,9 @@ class testClass
             return true;
         }
         
-        if (selectDisplay === "calibrateDivP2")
+        if (selectDisplay === "calibrateDivP2" ||
+            this.deleteFilter ||
+            this.deleteAlarm)
         {
             bleiface.itemReadWithBusy(item);
 
@@ -5019,39 +5023,39 @@ class alarmHistoryClass extends historyClass
             if (data.getUint8(20) != 0xff &&
                 (data.getUint8(20) & 0x80) == 0x80)
             {
-                let bMsgState = "Active";
-                let bMsgAlarms = "";
-                
-                switch (data.getUint8(20) & 0x03)
+                if ((data.getUint8(20) & 0x01) == 0)
                 {
-                    case 0x00:
-                    case 0x02:
-                        return "Buzzer Idle";
-                    case 0x01:
-                        bMsgState = "Active";
-                        break;
-                        
-                    case 0x03:
-                        bMsgState = "Muted";
-                    break;
+                    return "Buzzer Idle";
                 }
-                
-                if ((data.getUint8(12) & 0x03) != 0)
+             
+                let bMsgState = "Active";             
+                if ((data.getUint8(20) & 0x02) == 0x02)
                 {
-                    if ((data.getUint8(13) & 0x03) != 0)
+                    bMsgState = "Muted";    
+                }
+                let bMsgReason = "";
+                
+                if ((data.getUint8(20) & 0x30) != 0)
+                {
+                    if ((data.getUint8(20) & 0x08) != 0)
                     {
-                        bMsgAlarms = "Pressure and " + co2MsgState;
+                        bMsgReason = "Pressure and ";
+                    }
+                    if ((data.getUint8(20) & 0x20) != 0)
+                    {
+                        bMsgReason += "CO2 Active";
                     }
                     else
                     {
-                        bMsgAlarms = "Pressure";
+                        bMsgReason += "CO2 Warning";
                     }
                 }
                 else
                 {
-                    bMsgAlarms = co2MsgState; 
+                    bMsgReason = "Pressure";    
                 }
-                return "Buzzer " + bMsgState + " (" + bMsgAlarms + ")";
+                
+                return "Buzzer " + bMsgState + " (" + bMsgReason + ")";
             }            
         }
         if ((data.getUint8(12) & 0x03) != 0)
