@@ -4983,6 +4983,26 @@ class alarmHistoryClass extends historyClass
     
     dataRecordType(data)
     {
+        let co2MsgState = "CO2 Idle";
+        
+        if (protocolVersion >= 2)
+        {
+            switch (data.getUint8(13) & 0x03)
+            {
+                case 0x01:
+                    co2MsgState = "CO2 Info";
+                break;
+                
+                case 0x02:
+                    co2MsgState = "CO2 Warning";
+                break;
+                 
+                case 0x03:
+                    co2MsgState = "CO2 Active";
+                break;
+            }
+        }
+                
         if ((data.getUint8(13) & 0x80) == 0x80)
         {
             if (protocolVersion < 2)
@@ -4992,37 +5012,46 @@ class alarmHistoryClass extends historyClass
                     return "CO2 Active";
                 }
             }
-            else
-            {
-                switch (data.getUint8(13) & 0x03)
-                {
-                    case 0x01:
-                        return "CO2 Info";
-                    case 0x02:
-                        return "CO2 Warning";
-                    case 0x03:
-                        return "CO2 Active";
-                }                   
-            }
-            return "CO2 Idle";
+            return co2MsgState;
         }
         if (protocolVersion >= 2 && data.getUint8(1) >= 2)
         {
             if (data.getUint8(20) != 0xff &&
                 (data.getUint8(20) & 0x80) == 0x80)
             {
+                let bMsgState = "Active";
+                let bMsgAlarms = "";
+                
                 switch (data.getUint8(20) & 0x03)
                 {
                     case 0x00:
+                    case 0x02:
                         return "Buzzer Idle";
                     case 0x01:
-                        return "Buzzer Active";
+                        bMsgState = "Active";
+                        break;
+                        
                     case 0x03:
-                        return "Buzzer Muted";
-                    case 0x02:  // mute without a buzzer, just ignore
-                        break; 
+                        bMsgState = "Muted";
+                    break;
                 }
-                return "Buzzer Idle";
+                
+                if ((data.getUint8(12) & 0x03) != 0)
+                {
+                    if ((data.getUint8(13) & 0x03) != 0)
+                    {
+                        bMsgAlarms = "Pressure and " + co2MsgState;
+                    }
+                    else
+                    {
+                        bMsgAlarms = "Pressure";
+                    }
+                }
+                else
+                {
+                    bMsgAlarms = co2MsgState; 
+                }
+                return "Buzzer " + bMsgAlarms + " (" + bMsgAlarms + ")";
             }            
         }
         if ((data.getUint8(12) & 0x03) != 0)
