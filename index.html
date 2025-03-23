@@ -2523,6 +2523,11 @@ class testClass
                 this.deleteAlarm = true;
                 this.elementLogDbg.innerHTML = "Deleting Alarm Log...";
             }
+            if (this.send_cmd == 6)
+            {
+                this.elementLogDbg.innerHTML = "Running Counts Deleted";
+                this.timer = 5;
+            }
             return true;
         }
         
@@ -4398,18 +4403,36 @@ function calibratePoint(thePoint)
 
 function eraseLog(theLog)
 {
-    if (protocolVersion >= 2)
+    let confirmTxt = "Are you sure?";
+    switch (theLog)
     {
-        if (testControl)
-        {
-            testControl.executeEraseLog(theLog);
-        }
+        case 0:
+            confirmTxt = "Delete the filter log.\r\nContinue?";
+        break;
+        
+        case 1:
+            confirmTxt = "Delete the alarm log.\r\nContinue?";
+        break;
+        
+        case 2:
+            confirmTxt = "Delete the running counts.\r\nContinue?";
+        break;
     }
-    else
+    if (confirm(confirmTxt))
     {
-        if (calibrateControl)
+        if (protocolVersion >= 2)
         {
-            calibrateControl.executeEraseLog(theLog);
+            if (testControl)
+            {
+                testControl.executeEraseLog(theLog);
+            }
+        }
+        else
+        {
+            if (calibrateControl)
+            {
+                calibrateControl.executeEraseLog(theLog);
+            }
         }
     }
 }
