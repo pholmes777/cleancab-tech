@@ -567,6 +567,9 @@
     <h3>Log Management</h3>
     <div class="container">
       <div class="row">
+        <p id="logResultsDbg"></p>
+      </div> 
+      <div class="row">
         <div class="col-25">
         </div>
         <div class="col-65">
@@ -2362,6 +2365,7 @@ class testClass
         this.elementPressureBar = document.getElementById("testPressureBar");
         this.elementCO2Bar = document.getElementById("testCO2Bar");
         this.elementDbg = document.getElementById("testResultsDbg");
+        this.elementLogDbg = document.getElementById("logResultsDbg");
         this.elementRealPressure = document.getElementById("testRealPressure");
         this.elementRealCO2 = document.getElementById("testRealCO2");
         
@@ -2385,6 +2389,7 @@ class testClass
             if (this.timer == 0)
             {
                 this.elementDbg.innerHTML = "";
+                this.elementLogDbg.innerHTML = "";
             }
         }
     }
@@ -2438,16 +2443,14 @@ class testClass
             if (this.deleteAlarm && (data.getUint8(5) == 0))
             {
                 this.deleteAlarm = false;
-                this.elementDbg.innerHTML = "Alarm Log Deleted";    
+                this.elementLogDbg.innerHTML = "Alarm Log Deleted";    
                 this.timer = 5;
-                alert("Alarm Log successfully erased");
             }
             if (this.deleteFilter && (data.getUint8(6) == 0))
             {
                 this.deleteFilter = false;
-                this.elementDbg.innerHTML = "Filter Log Deleted";    
+                this.elementLogDbg.innerHTML = "Filter Log Deleted";    
                 this.timer = 5;
-                alert("Filter Log successfully erased");
             }
         }
     }   
@@ -2513,19 +2516,18 @@ class testClass
             if (this.send_cmd == 3)
             {
                 this.deleteFilter = true;
-                this.elementDbg.innerHTML = "Deleting Filter Log...";
+                this.elementLogDbg.innerHTML = "Deleting Filter Log...";
             }
             if (this.send_cmd == 4)
             {
                 this.deleteAlarm = true;
-                this.elementDbg.innerHTML = "Deleting Alarm Log...";
+                this.elementLogDbg.innerHTML = "Deleting Alarm Log...";
             }
             return true;
         }
         
         if (selectDisplay === "calibrateDivP2" ||
-            this.deleteFilter ||
-            this.deleteAlarm)
+            selectDisplay === "manageDiv")
         {
             bleiface.itemReadWithBusy(item);
 
