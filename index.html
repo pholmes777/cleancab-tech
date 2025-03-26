@@ -381,7 +381,7 @@
 </div>
 
 <div id="calibrationHistoryDiv" class="hiddenitemdiv">
-  <h3>Filter History</h3>
+  <h3>Calibration History</h3>
   <div class="container">
     <p id="calibrationHistorydbg"></p>
     <div class="row">
@@ -3690,6 +3690,19 @@ class blueToothCommission extends blueToothIf
                     {
                         calibrationHistory.handleRecordRead(0, decodedValue);
                     }
+					else
+					{
+						// invalid record but still more to check
+						
+						if (calibrationHistory.readState == 1)
+						{
+							calibrationHistory.readState = 3;
+						}
+						else
+						{
+							calibrationHistory.handleRecordRead(0, decodedValue);
+						}
+					}
                 }
                 else
                 {
