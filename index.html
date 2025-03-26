@@ -3595,11 +3595,8 @@ class blueToothCommission extends blueToothIf
             }
             this.retries = 0;
             
-            let req = nextId.toString();
-            
-            const encodedValue = new TextEncoder().encode(req);    
-            
-            this.write(encodedValue);
+            this.send = true;
+            this.sendValue = nextId.toString();
                     
             return true;
         }
