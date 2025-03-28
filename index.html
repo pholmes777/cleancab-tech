@@ -57,7 +57,7 @@
   <h3>Connection</h3>
   <div class="container">
     <div class="row">
-        <p id="connectingVersion">Cleancab App Version: 1.00</p>
+        <p id="connectingVersion">Cleancab App Version: 1.01</p>
     </div>
     <div class="row">
       <div style="width: 100%;height: 150px;background-image: url('cleancab.png'); background-repeat: no-repeat; background-size: contain; background-position: center;">
@@ -67,6 +67,41 @@
     <div class="row">
       <p id="connectingTicks"></p>
       <p id="connectingState"></p>  
+    </div>
+  </div>
+</div>
+
+<div id="firmwareDiv" class="hiddenitemdiv">
+  <h3>Firmware</h3>
+  <div class="container">
+    <form>
+      <div class="row">  
+        <div class="col-35">
+        </div>
+        <div class="col-65">
+            <input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn">    
+            <input id="firmwareInputFile" type='file' style="visibility:hidden;" onchange="firmwareReadFile(event)" />        
+        </div>
+      </div>
+    </form>
+    <div id="firmwareProgressDiv" class="hiddenitemdiv">     
+      <div class="row">
+        <div class="col-35">
+          <label>FileName</label>
+        </div>
+        <div class="col-65">
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-35">
+          <label>Progress</label>
+        </div>
+        <div class="col-65">
+          <div class="row-progress">
+            <div id="firmwareProcess" class="container-progress" style="width:0%">0%</div>
+          </div>
+        </div> 
+      </div>
     </div>
   </div>
 </div>
@@ -4346,6 +4381,7 @@ class blueToothStatus extends blueToothIf
 // variables
 
 var protocolVersion = 0;
+var supportedBitmap = 0;
 
 // bluetooth interface
 
@@ -4371,11 +4407,13 @@ class blueToothGeneral extends blueToothIf
             // this is the new version of the general message
         
             protocolVersion = readValue.getUint8(1);
+            supportedBitmap = readValue.getUint32(2, true);
             this.version = readValue.getUint8(6) + "." + pad2(readValue.getUint8(7));
         }
         else
         {
             protocolVersion = 0;
+            supportedBitmap = 0;
             const decodedValue = new TextDecoder().decode(readValue);
     
             this.version = decodedValue;  
@@ -4655,6 +4693,198 @@ class blueToothCalibrate extends blueToothIf
         calibrateControl.handleActions(this);
     }
 }    
+
+//==========================================================
+//
+//          Firmware update
+//
+//==========================================================
+
+function firmwareOpenFile()
+{
+    var item = bleiface.getItem("Firmware");
+    if (item)
+    {    
+        item.openFile();
+    }
+}
+
+function firmwareReadFile(e)
+{
+    var item = bleiface.getItem("Firmware");
+    if (item)
+    {    
+        item.loadFile(e);
+    }    
+}
+
+function firmwareHandleNotify()
+{
+    var item = bleiface.getItem("Firmware");
+    if (item)
+    {    
+        item.handleNotify();
+    }
+}
+
+class blueToothFirmware extends blueToothIf
+{
+    constructor ()
+    {
+        this.firmwareMenuItem = 0;
+        this.elementMenuItem = document.getElementById("menuItemLogin");
+        this.binaryFirmwareFile = 0;
+        this.inputFileElement = document.getElementById('firmwareInputFile');
+        this.chooseFileElement = document.getElementById('firmwareChooseBtn');
+        this.progressElement = document.getElementById('firmwareProgressDiv');
+        
+        super ("Firmware", 1, "aba886d1-094b-4808-87a8-6d1d73afd8fe");       
+    }
+    
+    setCharactistic(characteristic)
+    {
+        super (characteristic);
+        
+        if (characteristic)
+        {
+            characteristic.startNotifications();
+        }
+    }
+    
+    connect(service)
+    {
+        if (protocolVersion < 2)
+        {
+            if (supportedBitmap & 0x01)
+            {
+                return super.connect(service);
+            }
+        }
+        this.characteristic = null;
+        this.readValue = null;
+        this.validIsValid = false;
+        this.connectState = 2;
+        return true;
+    }
+    
+    disconnect()
+    {
+        if (this.firmwareMenuItem)
+        {
+            this.firmwareMenuItem.remove();
+            this.firmwareMenuItem = 0;
+        }
+    }
+    
+    protocolVersionSet()
+    {
+        super.protocolVersionSet();
+        if (protocolVersion >= 2 && (supportedBitmap & 0x01) == 0x01)
+        {
+            if (!this.firmwareMenuItem)
+            {
+                this.firmwareMenuItem = document.createElement("a");
+                this.firmwareMenuItem.setAttribute("href", "javascript:showDiv('firmwareDiv')");
+                this.firmwareMenuItem.innerHTML = "Firmware Update";
+                
+                this.elementMenuItem.parentNode.insertBefore(this.firmwareMenuItem, this.elementMenuItem.nextSibling); 
+            }
+        }
+        else        
+        {
+            if (this.firmwareMenuItem)
+            {
+                this.firmwareMenuItem.remove();
+                this.firmwareMenuItem = 0;
+            }
+        }
+    }
+
+    openFile()
+    {
+        if (this.inputFileElement)
+        {
+            this.inputFileElement.disabled = true;
+            this.progressElement.style.display = "block";
+            this.inputFileElement.click();
+        }
+    }
+    
+    loadFile(e)
+    {
+        var file = e.target.files[0];
+        if (!file) 
+        {
+            this.inputFileElement.disabled = false;
+            this.progressElement.style.display = "none";
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(e) 
+        {
+            var item = bleiface.getItem("Firmware");
+            if (item)
+            {    
+                item.startUpload(new Uint8Array(e.target.result));
+            }
+        };
+        reader.onerror = function() 
+        {
+            var item = bleiface.getItem("Firmware");
+            if (item)
+            {    
+                item.abortUpload();
+            }
+        };
+        reader.readAsArrayBuffer(file)
+    }
+    
+    abortUpload()
+    {
+        this.inputFileElement.disabled = false;   
+        this.progressElement.style.display = "none";        
+    }
+    
+    handleNotify()
+    {
+    }
+    
+    startUpload(thedata)
+    {
+        this.binaryFirmwareFile = thedata;
+    }
+    
+    sendRequest(sendCmd, sendIdx, sendValue)
+    {
+        let data = new Uint8Array(4);
+        const buffer = new ArrayBuffer(4);
+        const view = new DataView(buffer);
+            
+        data[0] = sendCmd;
+        data[1] = sendIdx;
+        data[2] = sendValue & 0x00ff;
+        data[3] = (sendValue >> 8) & 0x00ff;
+        
+        this.write(data);
+    }
+    
+    init()
+    {
+        if (this.initState == 0)
+        {
+            if (this.characteristic)
+            {
+                this.Characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
+            }
+            super init();
+        }
+    }
+    
+    run()
+    {
+    }
+}    
+
 
 //==========================================================
 //
@@ -5225,6 +5455,7 @@ class blueToothDevice
 
         this.bleItem.push(new blueToothAuthorize());
         this.bleItem.push(new blueToothCalibrate());
+        this.bleItem.push(new blueToothFirmware());
         
         this.busy = false;
         this.infoStr = "";
@@ -5613,6 +5844,8 @@ function connectToBluetooth()
             
             if (protocolVersion < 2)
                 return bleiface.itemConnect("Calibrate");
+            else if (supportedBitmap & 0x01)
+                return bleiface.itemConnect("Firmware");
             else
                 return true;
         })
@@ -5621,6 +5854,10 @@ function connectToBluetooth()
             if (protocolVersion < 2)
             {
                 bleiface.setItem("Calibrate", item7);
+            }
+            else if (supportedBitmap & 0x01)
+            {
+                bleiface.setItem("Firmware", item7);
             }
             
             return bleiface.itemConnect("Authorize");
