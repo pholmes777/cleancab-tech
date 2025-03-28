@@ -4743,20 +4743,21 @@ function firmwareHandleNotify()
 class blueToothFirmware extends blueToothIf
 {
     constructor ()
-    {
+    {            
+        super ("Firmware", 1, "aba886d1-094b-4808-87a8-6d1d73afd8fe");
+        
         this.firmwareMenuItem = 0;
         this.elementMenuItem = document.getElementById("menuItemLogin");
         this.binaryFirmwareFile = 0;
         this.inputFileElement = document.getElementById('firmwareInputFile');
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
         this.progressElement = document.getElementById('firmwareProgressDiv');
-        
-        super ("Firmware", 1, "aba886d1-094b-4808-87a8-6d1d73afd8fe");       
+       
     }
     
     setCharactistic(characteristic)
     {
-        super (characteristic);
+        super.setCharactistic(characteristic);
         
         if (characteristic)
         {
@@ -4889,7 +4890,7 @@ class blueToothFirmware extends blueToothIf
             {
                 this.Characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
             }
-            super init();
+            super.init();
         }
     }
     
