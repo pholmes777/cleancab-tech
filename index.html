@@ -42,7 +42,7 @@
   </a>
 </div>
 
-<!--div id="debugDiv">
+<div id="debugDiv">
   <div class="container">
     <div class="row">
       <p id="phdbg"></p>
@@ -51,13 +51,13 @@
         <input id="phdbgBtn" type="button" value="Clear" onclick="phdbgClear()" class="btn">
     </div>
   </div>
-</div-->
+</div>
 
 <div id="connectingDiv" class="hiddenitemdiv">
   <h3>Connection</h3>
   <div class="container">
     <div class="row">
-        <p id="connectingVersion">Cleancab App Version: 1.01</p>
+        <p id="connectingVersion">Cleancab App Version: 1.01-1</p>
     </div>
     <div class="row">
       <div style="width: 100%;height: 150px;background-image: url('cleancab.png'); background-repeat: no-repeat; background-size: contain; background-position: center;">
@@ -1477,17 +1477,17 @@ if ('serviceWorker' in navigator)
 //
 //=====================================================
 
-//const phdbg = document.querySelector("#phdbg");
+const phdbg = document.querySelector("#phdbg");
 //var phdbgc = 0;
 var menuDisabled=false;
 
-//function phdbgClear()
-//{
-//    if (phdbg)
-//    {
-//        phdbg.innerHTML = "";
-//    }
-//}
+function phdbgClear()
+{
+    if (phdbg)
+    {
+        phdbg.innerHTML = "";
+    }
+}
 
 var registerMode = 99;
 const cTechInstallerCompany = document.querySelector("#techInstallerCompany");
@@ -4751,13 +4751,12 @@ class blueToothFirmware extends blueToothIf
         this.binaryFirmwareFile = 0;
         this.inputFileElement = document.getElementById('firmwareInputFile');
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
-        this.progressElement = document.getElementById('firmwareProgressDiv');
-       
+        this.progressElement = document.getElementById('firmwareProgressDiv');    
     }
     
     setCharactistic(characteristic)
     {
-        super.setCharactistic(characteristic);
+        super.setCharactistic(characteristic);      
         
         if (characteristic)
         {
@@ -4767,13 +4766,14 @@ class blueToothFirmware extends blueToothIf
     
     connect(service)
     {
-        if (protocolVersion < 2)
+        if (protocolVersion >= 2)
         {
             if (supportedBitmap & 0x01)
             {
                 return super.connect(service);
             }
         }
+        
         this.characteristic = null;
         this.readValue = null;
         this.validIsValid = false;
@@ -5651,10 +5651,10 @@ class blueToothDevice
             break;
 
             case DBG_INFO:
-                //if (phdbg)
-                //{
-                //    phdbg.innerHTML += "<br>" + msg;
-                //}
+                if (phdbg)
+                {
+                    phdbg.innerHTML += "<br>" + msg;
+                }
             break;
 
             case DBG_ERROR:
@@ -5949,10 +5949,10 @@ function onDisconnected(event)
   connectingState.innerHTML = "Device disconnected";
   cConnectBtn.value = "Connect";
   
-  //if (phdbg)
-  //{
-  //  phdbg.innerHTML = "";
-  //}
+  if (phdbg)
+  {
+    phdbg.innerHTML = "";
+  }
 }
 
 const cConnectBtn = document.querySelector("#connectBtn");
