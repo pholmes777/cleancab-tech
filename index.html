@@ -4888,7 +4888,7 @@ class blueToothFirmware extends blueToothIf
         {
             if (this.characteristic)
             {
-                this.Characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
+                this.characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
             }
             super.init();
         }
