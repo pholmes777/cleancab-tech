@@ -102,6 +102,13 @@
           </div>
         </div> 
       </div>
+      <div class="row">
+        <div class="col-35">
+        </div>
+        <div class="col-65">
+          <input id="firmwareCancelBtn" type="button" value="Cancel" onclick="firmwareTransferCancel()" class="btn">
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -4740,6 +4747,15 @@ function firmwareHandleNotify(e)
     }
 }
 
+function firmwareTransferCancel()
+{
+    var item = bleiface.getItem("Firmware");
+    if (item)
+    {    
+        item.sendCancel();
+    }
+}
+
 class blueToothFirmware extends blueToothIf
 {
     constructor ()
@@ -4957,7 +4973,7 @@ class blueToothFirmware extends blueToothIf
         this.retry = 3;
         
         this.sendProgressElement.style.width = "0%";
-        this.sendProgressElement.innerHTML = "0%";
+        this.sendProgressElement.innerHTML = this.readIdx + ' of ' + this.binaryFirmwareFile.length;
         
         this.binaryFirmwareFile = thedata;
         this.readIdx = 0;
@@ -5011,12 +5027,11 @@ class blueToothFirmware extends blueToothIf
             
             if (this.binaryFirmwareFile.length > 0)
             {
-                let progress = Math.floor((this.readIdx * 100) / this.binaryFirmwareFile);
+                let progress = Math.floor((this.readIdx * 100) / this.binaryFirmwareFile.length);
                 
-                //this.sendProgressElement.style.width = progress + '%';
-                //this.sendProgressElement.innerHTML = progress + '%';
+                this.sendProgressElement.style.width = progress + '%';
             }
-            this.sendProgressElement.innerHTML = this.readIdx;
+            this.sendProgressElement.innerHTML = this.readIdx + ' of ' + this.binaryFirmwareFile.length;
         }
         else
         {
