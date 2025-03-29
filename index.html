@@ -4755,6 +4755,8 @@ class blueToothFirmware extends blueToothIf
         this.sendProgressElement = document.getElementById('firmwareProgress');
         this.uploadState = 0;
         this.readIdx = 0;
+        this.lastReadIdx = 0;
+        this.retry = 0;
     }
     
     connect(service)
@@ -4882,6 +4884,24 @@ class blueToothFirmware extends blueToothIf
                                  (e.target.value.getUint8(4) << 16) |
                                  (e.target.value.getUint8(5) << 24);
                     
+                    if (this.lastReadIdx == this.readIdx)
+                    {
+                        if (this.retry > 0)
+                        {
+                            this.retry--;
+                        }
+                        if (this.retry == 0)
+                        {
+                            this.abortUpload("Too many retires: " + this.readIdx);
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        this.lastReadIdx = this.readIdx;
+                        this.retry = 3;
+                    }
+        
                     this.sendNextSection();             
                 }
                 else
@@ -4933,6 +4953,9 @@ class blueToothFirmware extends blueToothIf
     
     startUpload(thedata)
     {
+        this.lastReadIdx = 0;
+        this.retry = 3;
+        
         this.sendProgressElement.style.width = "0%";
         this.sendProgressElement.innerHTML = "0%";
         
@@ -4949,6 +4972,8 @@ class blueToothFirmware extends blueToothIf
         data[4] = 0;        
         
         this.write(data);
+        
+        bleiface.setMessage(DBG_INFO, "File size=" + this.binaryFirmwareFile.length);        
     }
     
     sendNextSection()
