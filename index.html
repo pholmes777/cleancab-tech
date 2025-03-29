@@ -98,7 +98,7 @@
         </div>
         <div class="col-65">
           <div class="row-progress">
-            <div id="firmwareProcess" class="container-progress" style="width:0%">0%</div>
+            <div id="firmwareProgress" class="container-progress" style="width:0%">0%</div>
           </div>
         </div> 
       </div>
@@ -4731,12 +4731,12 @@ function firmwareReadFile(e)
     }    
 }
 
-function firmwareHandleNotify()
+function firmwareHandleNotify(e)
 {
     var item = bleiface.getItem("Firmware");
     if (item)
     {    
-        item.handleNotify();
+        item.handleNotify(e);
     }
 }
 
@@ -4751,17 +4751,10 @@ class blueToothFirmware extends blueToothIf
         this.binaryFirmwareFile = 0;
         this.inputFileElement = document.getElementById('firmwareInputFile');
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
-        this.progressElement = document.getElementById('firmwareProgressDiv');    
-    }
-    
-    setCharactistic(characteristic)
-    {
-        super.setCharactistic(characteristic);      
-        
-        if (characteristic)
-        {
-            //characteristic.startNotifications();
-        }
+        this.progressElement = document.getElementById('firmwareProgressDiv');   
+        this.sendProgressElement = document.getElementById('firmwareProgress');
+        this.uploadState = 0;
+        this.readIdx = 0;
     }
     
     connect(service)
@@ -4818,7 +4811,7 @@ class blueToothFirmware extends blueToothIf
     {
         if (this.inputFileElement)
         {
-            this.inputFileElement.disabled = true;
+            this.chooseFileElement.disabled = true;
             this.progressElement.style.display = "block";
             this.inputFileElement.click();
         }
@@ -4829,7 +4822,7 @@ class blueToothFirmware extends blueToothIf
         var file = e.target.files[0];
         if (!file) 
         {
-            this.inputFileElement.disabled = false;
+            this.chooseFileElement.disabled = false;
             this.progressElement.style.display = "none";
             return;
         }
@@ -4847,39 +4840,152 @@ class blueToothFirmware extends blueToothIf
             var item = bleiface.getItem("Firmware");
             if (item)
             {    
-                item.abortUpload();
+                item.abortUpload("File error");
             }
         };
         reader.readAsArrayBuffer(file)
     }
     
-    abortUpload()
+    abortUpload(reason)
     {
         this.inputFileElement.disabled = false;   
-        this.progressElement.style.display = "none";        
+        this.progressElement.style.display = "none";    
+        this.uploadState = 0;        
     }
     
-    handleNotify()
+    handleNotify(e)
     {
+        switch (this.uploadState)
+        {
+            case 1:     // upload Start
+                if (e.target.value.getUint8(0) == 100)
+                {
+                    // we have started
+                    
+                    this.uploadState = 2;
+                    this.sendNextSection();
+                }
+                else
+                {
+                    abortUpload("Failed to start upload");    
+                }
+            break;
+            
+            case 2:     // continue
+                if (e.target.value.getUint8(0) == 0 ||      // Ok
+                    e.target.value.getUint8(0) == 4)        // Invalid position
+                {
+                    m_total_rx = e.target.value.getUint8(2) |
+                                 (e.target.value.getUint8(3) << 8) |
+                                 (e.target.value.getUint8(4) << 16) |
+                                 (e.target.value.getUint8(5) << 24);
+                    
+                    this.sendNextSection();             
+                }
+                else
+                {
+                    abortUpload("Aborted by device");    
+                }
+            break;
+            
+            case 3:     // done
+                if (e.target.value.getUint8(0) == 101)      // done
+                {
+                    this.uploadState = 4;                    
+                    this.sendReset();                    
+                }
+                else
+                {
+                    abortUpload("Device failed to burn");  
+                }
+            break;
+            
+            default:
+                abortUpload("Unknown state");
+                this.uploadState = 0;
+            break;
+        }
+    }
+    
+    sendCancel()
+    {
+        if (this.uploadState != 0)
+        {
+            let data = new Uint8Array(1);
+            
+            data[0] = 3;
+        
+            this.write(data);
+            abortUpload("Canceled");
+        }
+    }
+    
+    sendReset()
+    {
+        let data = new Uint8Array(1);
+            
+        data[0] = 4;
+        
+        this.write(data);
     }
     
     startUpload(thedata)
     {
+        this.sendProgressElement.style.width = "0%";
+        this.sendProgressElement.innerHTML = "0%";
+        
         this.binaryFirmwareFile = thedata;
-    }
-    
-    sendRequest(sendCmd, sendIdx, sendValue)
-    {
-        let data = new Uint8Array(4);
-        const buffer = new ArrayBuffer(4);
-        const view = new DataView(buffer);
+        this.readIdx = 0;
+        this.uploadState = 1;
+                
+        let data = new Uint8Array(1);
             
-        data[0] = sendCmd;
-        data[1] = sendIdx;
-        data[2] = sendValue & 0x00ff;
-        data[3] = (sendValue >> 8) & 0x00ff;
+        data[0] = 0;
         
         this.write(data);
+    }
+    
+    sendNextSection()
+    {
+        if (this.uploadState == 2)
+        {
+            let txSize = this.binaryFirmwareFile.length - this.readIdx;
+            
+            if (txSize > (512 - 5))
+            {
+                txSize = 512;
+            }
+            else
+            {
+                txSize += 5;
+            }
+                        
+            let data = new Uint8Array(txSize);  
+
+            data[0] = (txSize > 0) ? 1 : 2;
+            data[1] = this.readIdx;
+            data[2] = this.readIdx >> 8;
+            data[3] = this.readIdx >> 16;
+            data[4] = this.readIdx >> 24;
+            
+            if (txSize > 0)
+            {
+                data.set(this.binaryFirmwareFile.subarray(this.readIdx, txSize - 5), 5);
+            }
+            else
+            {
+                this.uploadState = 3;
+            }
+            this.write(data);
+            
+            if (this.binaryFirmwareFile.length > 0)
+            {
+                let progress = Math.floor((this.readIdx * 100) / this.binaryFirmwareFile);
+                
+                this.sendProgressElement.style.width = progress + '%';
+                this.sendProgressElement.innerHTML = progress + '%';
+            }
+        }
     }
     
     init()
@@ -4896,6 +5002,7 @@ class blueToothFirmware extends blueToothIf
     
     run()
     {
+
     }
 }    
 
@@ -5835,9 +5942,15 @@ function connectToBluetooth()
         {
             if (protocolVersion >= 2 && (supportedBitmap & 0x01))
             {
-                bleiface.setItem("Firmware", item0);    
-            }
+                bleiface.setItem("Firmware", item0); 
 
+                return item0.startNotifications();
+            }
+            else    
+                return true;
+        })
+        .then(_ =>
+        {
             return bleiface.itemConnect("Test");
         })
         .then(item1 =>
