@@ -5450,8 +5450,9 @@ class blueToothDevice
         this.server = null;
         
         this.serviceUUID = new Array("0666a01a-035e-4a01-9bd8-77b2b56a6bd1",
-                                     "0666a01b-035e-4a01-9bd8-77b2b56a6bd1");
-        this.service = new Array(null, null);
+                                     "0666a01b-035e-4a01-9bd8-77b2b56a6bd1",
+                                     "0666a01c-035e-4a01-9bd8-77b2b56a6bd1");
+        this.service = new Array(null, null, null);
         
         this.bleItem = new Array();
         
@@ -5492,6 +5493,7 @@ class blueToothDevice
         this.device = null;
         this.service[0] = null;
         this.service[1] = null;
+        this.service[2] = null;
         this.server = null;
         this.connectState = 0;
         this.busy = false;
@@ -5536,6 +5538,7 @@ class blueToothDevice
         this.device = null;
         this.service[0] = null;
         this.service[1] = null;
+        this.service[2] = null;
         this.server = null;
     }
     
@@ -5808,6 +5811,33 @@ function connectToBluetooth()
         {
             bleiface.setRead("General", cdata);
             
+            if (protocolVersion >= 2 && (supportedBitmap & 0x01))
+            {
+                return bleiface.serviceConnect(2);
+            }
+            else
+            {  
+                return true;
+            }
+        })
+        .then(service2 =>
+        {
+            if (protocolVersion >= 2 && (supportedBitmap & 0x01))
+            {
+                bleiface.setService(2, service2);
+                
+                return bleiface.itemConnect("Firmware");
+            }
+            else
+                return true;
+        })
+        .then(item0 =>
+        {
+            if (protocolVersion >= 2 && (supportedBitmap & 0x01))
+            {
+                bleiface.setItem("Firmware", item0);    
+            }
+
             return bleiface.itemConnect("Test");
         })
         .then(item1 =>
@@ -5858,8 +5888,6 @@ function connectToBluetooth()
             
             if (protocolVersion < 2)
                 return bleiface.itemConnect("Calibrate");
-            else if (supportedBitmap & 0x01)
-                return bleiface.itemConnect("Firmware");
             else
                 return true;
         })
@@ -5868,10 +5896,6 @@ function connectToBluetooth()
             if (protocolVersion < 2)
             {
                 bleiface.setItem("Calibrate", item7);
-            }
-            else if (supportedBitmap & 0x01)
-            {
-                bleiface.setItem("Firmware", item7);
             }
             
             return bleiface.itemConnect("Authorize");
