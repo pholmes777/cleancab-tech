@@ -4850,7 +4850,7 @@ class blueToothFirmware extends blueToothIf
     {
         bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
-        this.inputFileElement.disabled = false;   
+        this.chooseFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
         this.uploadState = 0;        
     }
@@ -4869,7 +4869,7 @@ class blueToothFirmware extends blueToothIf
                 }
                 else
                 {
-                    this.abortUpload("Failed to start upload");    
+                    this.abortUpload("Failed to start upload:" + e.target.value.getUint8(0));    
                 }
             break;
             
@@ -4886,7 +4886,7 @@ class blueToothFirmware extends blueToothIf
                 }
                 else
                 {
-                    this.abortUpload("Aborted by device");    
+                    this.abortUpload("Aborted by device: " + e.target.value.getUint8(0));    
                 }
             break;
             
