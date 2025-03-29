@@ -80,7 +80,7 @@
         </div>
         <div class="col-65">
             <input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn">    
-            <input id="firmwareInputFile" type='file' style="visibility:hidden;" onchange="firmwareReadFile(event)" />        
+            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)" />        
         </div>
       </div>
     </form>
@@ -4848,6 +4848,8 @@ class blueToothFirmware extends blueToothIf
     
     abortUpload(reason)
     {
+        bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
+        
         this.inputFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
         this.uploadState = 0;        
@@ -4867,7 +4869,7 @@ class blueToothFirmware extends blueToothIf
                 }
                 else
                 {
-                    abortUpload("Failed to start upload");    
+                    this.abortUpload("Failed to start upload");    
                 }
             break;
             
@@ -4884,7 +4886,7 @@ class blueToothFirmware extends blueToothIf
                 }
                 else
                 {
-                    abortUpload("Aborted by device");    
+                    this.abortUpload("Aborted by device");    
                 }
             break;
             
@@ -4896,12 +4898,12 @@ class blueToothFirmware extends blueToothIf
                 }
                 else
                 {
-                    abortUpload("Device failed to burn");  
+                    this.abortUpload("Device failed to burn");  
                 }
             break;
             
             default:
-                abortUpload("Unknown state");
+                this.abortUpload("Unknown state");
                 this.uploadState = 0;
             break;
         }
@@ -4916,7 +4918,7 @@ class blueToothFirmware extends blueToothIf
             data[0] = 3;
         
             this.write(data);
-            abortUpload("Canceled");
+            this.abortUpload("Canceled");
         }
     }
     
