@@ -5013,9 +5013,14 @@ class blueToothFirmware extends blueToothIf
             {
                 let progress = Math.floor((this.readIdx * 100) / this.binaryFirmwareFile);
                 
-                this.sendProgressElement.style.width = progress + '%';
-                this.sendProgressElement.innerHTML = progress + '%';
+                //this.sendProgressElement.style.width = progress + '%';
+                //this.sendProgressElement.innerHTML = progress + '%';
             }
+            this.sendProgressElement.innerHTML = this.readIdx;
+        }
+        else
+        {
+            this.abortUpload("Not in upload state");
         }
     }
     
