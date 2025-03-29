@@ -4877,7 +4877,7 @@ class blueToothFirmware extends blueToothIf
                 if (e.target.value.getUint8(0) == 0 ||      // Ok
                     e.target.value.getUint8(0) == 4)        // Invalid position
                 {
-                    m_total_rx = e.target.value.getUint8(2) |
+                    this.readIdx = e.target.value.getUint8(2) |
                                  (e.target.value.getUint8(3) << 8) |
                                  (e.target.value.getUint8(4) << 16) |
                                  (e.target.value.getUint8(5) << 24);
