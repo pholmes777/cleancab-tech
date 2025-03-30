@@ -84,7 +84,7 @@ input:checked + .slider:before
 }
 .container-progress
 {
-  min-width: 0%;  
+  min-width: 1%;  
   padding:4px 16px;
   color:#fff;
   background-color:#4CAF50;
@@ -93,7 +93,7 @@ input:checked + .slider:before
 
 .container-progress-alarm
 {
-  min-width: 0%;
+  min-width: 1%;
   padding:4px 16px;
   color:#fff;
   background-color:#FF1919;
@@ -102,7 +102,7 @@ input:checked + .slider:before
 
 .container-progress-warning
 {
-  min-width: 0%;
+  min-width: 1%;
   padding:4px 16px;
   color:#fff;
   background-color:#FFAE19;
