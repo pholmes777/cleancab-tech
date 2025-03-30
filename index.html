@@ -90,6 +90,7 @@
           <label>FileName</label>
         </div>
         <div class="col-65">
+          <input id="firmwareFileName" type='text' readOnly="true" value=""/>  
         </div>
       </div>
       <div class="row">
@@ -98,10 +99,18 @@
         </div>
         <div class="col-65">
           <div class="row-progress">
-            <div id="firmwareProgress" class="container-progress" style="width:0%">0%</div>
+            <div id="firmwareProgress" class="container-progress" style="width:10%">10%</div>
           </div>
         </div> 
       </div>
+      <div class="row">
+        <div class="col-35">
+          <label>Transfered</label>
+        </div>
+        <div class="col-65">
+          <input id="firmwareTransfer" type='text' readOnly="true" value=""/>  
+        </div>
+      </div>      
       <div class="row">
         <div class="col-35">
         </div>
@@ -4769,6 +4778,8 @@ class blueToothFirmware extends blueToothIf
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
         this.progressElement = document.getElementById('firmwareProgressDiv');   
         this.sendProgressElement = document.getElementById('firmwareProgress');
+        this.fileNameElement = document.getElementById('firmwareFileName');
+        this.transferElement = document.getElementById('firmwareTransfer');
         this.uploadState = 0;
         this.readIdx = 0;
         this.lastReadIdx = 0;
@@ -4844,6 +4855,8 @@ class blueToothFirmware extends blueToothIf
             this.progressElement.style.display = "none";
             return;
         }
+        this.fileNameElement.value = file;
+        
         var reader = new FileReader();
         reader.onload = function(e) 
         {
@@ -4973,8 +4986,9 @@ class blueToothFirmware extends blueToothIf
         this.retry = 3;
         
         this.sendProgressElement.style.width = "0%";
-        this.sendProgressElement.innerHTML = this.readIdx + ' of ' + this.binaryFirmwareFile.length;
+        this.sendProgressElement.innerHTML = this.readIdx;
         
+        this.transferElement.value = this.readIdx + " of " + this.binaryFirmwareFile.length;
         this.binaryFirmwareFile = thedata;
         this.readIdx = 0;
         this.uploadState = 1;
@@ -4996,6 +5010,8 @@ class blueToothFirmware extends blueToothIf
     {
         if (this.uploadState == 2)
         {
+            this.transferElement.value = this.readIdx + " of " + this.binaryFirmwareFile.length;
+            
             let txSize = this.binaryFirmwareFile.length - this.readIdx;
             
             if (txSize > (512 - 5))
@@ -5030,8 +5046,8 @@ class blueToothFirmware extends blueToothIf
                 let progress = Math.floor((this.readIdx * 100) / this.binaryFirmwareFile.length);
                 
                 this.sendProgressElement.style.width = progress + '%';
+                this.sendProgressElement.innerHTML = progress + '%';
             }
-            this.sendProgressElement.innerHTML = this.readIdx + ' of ' + this.binaryFirmwareFile.length;
         }
         else
         {
