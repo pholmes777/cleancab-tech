@@ -42,7 +42,7 @@
   </a>
 </div>
 
-<div id="debugDiv">
+<!--div id="debugDiv">
   <div class="container">
     <div class="row">
       <p id="phdbg"></p>
@@ -51,7 +51,7 @@
         <input id="phdbgBtn" type="button" value="Clear" onclick="phdbgClear()" class="btn">
     </div>
   </div>
-</div>
+</div-->
 
 <div id="connectingDiv" class="hiddenitemdiv">
   <h3>Connection</h3>
@@ -1493,17 +1493,17 @@ if ('serviceWorker' in navigator)
 //
 //=====================================================
 
-const phdbg = document.querySelector("#phdbg");
+//const phdbg = document.querySelector("#phdbg");
 //var phdbgc = 0;
 var menuDisabled=false;
 
-function phdbgClear()
-{
-    if (phdbg)
-    {
-        phdbg.innerHTML = "";
-    }
-}
+//function phdbgClear()
+//{
+//    if (phdbg)
+//    {
+//        phdbg.innerHTML = "";
+//    }
+//}
 
 var registerMode = 99;
 const cTechInstallerCompany = document.querySelector("#techInstallerCompany");
@@ -5828,10 +5828,10 @@ class blueToothDevice
             break;
 
             case DBG_INFO:
-                if (phdbg)
-                {
-                    phdbg.innerHTML += "<br>" + msg;
-                }
+                //if (phdbg)
+                //{
+                //    phdbg.innerHTML += "<br>" + msg;
+                //}
             break;
 
             case DBG_ERROR:
@@ -6153,10 +6153,10 @@ function onDisconnected(event)
   connectingState.innerHTML = "Device disconnected";
   cConnectBtn.value = "Connect";
   
-  if (phdbg)
-  {
-    phdbg.innerHTML = "";
-  }
+  //if (phdbg)
+  //{
+  //  phdbg.innerHTML = "";
+  //}
 }
 
 const cConnectBtn = document.querySelector("#connectBtn");
