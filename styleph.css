@@ -93,6 +93,7 @@ input:checked + .slider:before
 
 .container-progress-alarm
 {
+  min-width: 0%;
   padding:4px 16px;
   color:#fff;
   background-color:#FF1919;
@@ -101,6 +102,7 @@ input:checked + .slider:before
 
 .container-progress-warning
 {
+  min-width: 0%;
   padding:4px 16px;
   color:#fff;
   background-color:#FFAE19;
