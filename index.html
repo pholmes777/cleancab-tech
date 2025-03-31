@@ -5118,14 +5118,10 @@ class blueToothFirmware extends blueToothIf
             
             if (txSize > (512 - 5))
             {
-                txSize = 512;
-            }
-            else
-            {
-                txSize += 5;
+                txSize = 512 - 5;
             }
                         
-            let data = new Uint8Array(txSize);  
+            let data = new Uint8Array(txSize + 5);  
 
             data[0] = (txSize > 0) ? 1 : 2;
             data[1] = this.readIdx;
@@ -5133,9 +5129,9 @@ class blueToothFirmware extends blueToothIf
             data[3] = this.readIdx >> 16;
             data[4] = this.readIdx >> 24;
             
-            if (txSize > 5)
+            if (txSize > 0)
             {
-                data.set(this.binaryFirmwareFile.subarray(this.readIdx, txSize - 5), 5);
+                data.set(this.binaryFirmwareFile.subarray(this.readIdx, txSize), 5);
             }
             else
             {
