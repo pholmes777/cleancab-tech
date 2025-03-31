@@ -4772,6 +4772,8 @@ function firmwareTransferCancel()
     }
 }
 
+let wakeLockObj = null;
+
 class blueToothFirmware extends blueToothIf
 {
     constructor ()
@@ -4818,6 +4820,7 @@ class blueToothFirmware extends blueToothIf
             this.firmwareMenuItem.remove();
             this.firmwareMenuItem = 0;
         }
+        abortUpload("Disconnected");
     }
     
     protocolVersionSet()
@@ -4890,9 +4893,16 @@ class blueToothFirmware extends blueToothIf
         bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
         this.transferResultElement.innerHTML = "Failed: " + reason;
+
         this.chooseFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
-        this.uploadState = 0;        
+        this.uploadState = 0;  
+
+        if (wakeLockObj)        
+        {
+            wakeLockObj.release();
+            wakeLockObj = null;
+        }
     }
     
     handleNotify(e)
@@ -4953,12 +4963,21 @@ class blueToothFirmware extends blueToothIf
                 {
                     this.transferResultElement.innerHTML = "Success. Restarting device";
                     this.uploadState = 4;                    
-                    this.sendReset();                    
+                    this.sendReset(); 
+                    if (wakeLockObj)        
+                    {
+                        wakeLockObj.release();
+                        wakeLockObj = null;
+                    }                    
                 }
                 else
                 {
                     this.abortUpload("Device failed to burn");  
                 }
+            break;
+            
+            case 4:
+                // just waiting to disconnect.
             break;
             
             default:
@@ -4992,6 +5011,22 @@ class blueToothFirmware extends blueToothIf
     
     startUpload(thedata)
     {
+        if ("wakeLock" in navigator)
+        {
+            navigator.wakeLock.request('screen')
+                .then((wakeLock) => 
+                {
+                    wakeLockObj = wakeLock;
+          
+                    wakeLockObj.addEventListener('release', () => 
+                    {
+                        wakeLockObj = null;
+                    })
+                })
+                .catch((err) => 
+                {
+                })
+        }
         this.lastReadIdx = 0;
         this.retry = 3;
         
@@ -5041,7 +5076,7 @@ class blueToothFirmware extends blueToothIf
             data[3] = this.readIdx >> 16;
             data[4] = this.readIdx >> 24;
             
-            if (txSize > 0)
+            if (txSize > 5)
             {
                 data.set(this.binaryFirmwareFile.subarray(this.readIdx, txSize - 5), 5);
             }
