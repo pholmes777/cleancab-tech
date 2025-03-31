@@ -79,9 +79,8 @@
         <div class="col-35">
         </div>
         <div class="col-65">
-            <!--input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn">    
-            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)" /-->   
-            <input id="firmwareInputFile" type='file' accept=".bin" onchange="firmwareReadFile(event)" />               
+            <input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn"/>    
+            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)"/>  
         </div>
       </div>
       <div class="row">
@@ -4864,7 +4863,7 @@ class blueToothFirmware extends blueToothIf
             this.progressElement.style.display = "none";
             return;
         }
-        this.fileNameElement.value = file;
+        this.fileNameElement.value = file.name;
         
         var reader = new FileReader();
         reader.onload = function(e) 
