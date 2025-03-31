@@ -79,8 +79,16 @@
         <div class="col-35">
         </div>
         <div class="col-65">
-            <input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn">    
-            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)" />        
+            <!--input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn">    
+            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)" /-->   
+            <input id="firmwareInputFile" type='file' accept=".bin" onchange="firmwareReadFile(event)" />               
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-35">
+        </div>
+        <div class="col-65">
+          <p id="firmwareResult"></p>
         </div>
       </div>
     </form>
@@ -4780,6 +4788,7 @@ class blueToothFirmware extends blueToothIf
         this.sendProgressElement = document.getElementById('firmwareProgress');
         this.fileNameElement = document.getElementById('firmwareFileName');
         this.transferElement = document.getElementById('firmwareTransfer');
+        this.transferResultElement = document.getElementById('firmwareResult');
         this.uploadState = 0;
         this.readIdx = 0;
         this.lastReadIdx = 0;
@@ -4881,6 +4890,7 @@ class blueToothFirmware extends blueToothIf
     {
         bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
+        this.transferResultElement.innerHTML = "Failed: " + reason;
         this.chooseFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
         this.uploadState = 0;        
@@ -4942,6 +4952,7 @@ class blueToothFirmware extends blueToothIf
             case 3:     // done
                 if (e.target.value.getUint8(0) == 101)      // done
                 {
+                    this.transferResultElement.innerHTML = "Success. Restarting device";
                     this.uploadState = 4;                    
                     this.sendReset();                    
                 }
