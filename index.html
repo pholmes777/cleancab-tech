@@ -4852,7 +4852,6 @@ class blueToothFirmware extends blueToothIf
         if (this.inputFileElement)
         {
             this.chooseFileElement.disabled = true;
-            this.progressElement.style.display = "block";
             this.inputFileElement.click();
         }
     }
@@ -4866,7 +4865,8 @@ class blueToothFirmware extends blueToothIf
             this.progressElement.style.display = "none";
             return;
         }
-        this.fileNameElement.value = file.name;
+        this.fileNameElement.value = file.name;        
+        this.progressElement.style.display = "block";
         
         var reader = new FileReader();
         reader.onload = function(e) 
