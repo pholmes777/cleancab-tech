@@ -77,17 +77,17 @@
     <form>
       <div class="row">  
         <div class="col-35">
+            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)"/>  
         </div>
         <div class="col-65">
             <input id="firmwareChooseBtn" type="button" value="Select File" onclick="firmwareOpenFile()" class="btn"/>    
-            <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)"/>  
         </div>
       </div>
       <div class="row">
         <div class="col-35">
         </div>
         <div class="col-65">
-          <p id="firmwareResult"></p>
+          <input id="firmwareResult" type='text' readOnly="true" value=""/>  
         </div>
       </div>
     </form>
@@ -4777,7 +4777,7 @@ function firmwareTick()
     var item = bleiface.getItem("Firmware");
     if (item)
     {    
-        item.tick();
+        //item.tick();
     }
 }
 
@@ -4910,12 +4910,12 @@ class blueToothFirmware extends blueToothIf
         {
             bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
-            this.transferResultElement.innerHTML = "Failed: " + reason;
-            this.displayTimer = 5;
+            this.transferResultElement.value = "Failed: " + reason;
+            this.displayTimer = 10;
         }
         else
         {
-            this.transferResultElement.innerHTML = "";
+            this.transferResultElement.value = "";
             this.displayTimer = 0;
         }
         this.chooseFileElement.disabled = false;   
@@ -4949,7 +4949,7 @@ class blueToothFirmware extends blueToothIf
                     
                     if (this.displayTimer == 0)
                     {
-                        this.transferResultElement.innerHTML = "";
+                        this.transferResultElement.value = "";
                     }
                 }
             break;
@@ -4983,7 +4983,7 @@ class blueToothFirmware extends blueToothIf
             case 4:
                 if (expired)
                 {
-                    this.transferResultElement.innerHTML = "";
+                    this.transferResultElement.value = "";
                     bleiface.disconnect();
                 }
             break;
@@ -4994,6 +4994,10 @@ class blueToothFirmware extends blueToothIf
     {
         switch (this.uploadState)
         {
+            case 0:
+                // ignore
+            break;
+            
             case 1:     // upload Start
                 if (e.target.value.getUint8(0) == 100)
                 {
@@ -5050,8 +5054,8 @@ class blueToothFirmware extends blueToothIf
                     this.abortUpload(null);
             
                     this.timer = 5;
-                    this.displayTimer = 5;            
-                    this.transferResultElement.innerHTML = "Success. Restarting device";
+                    this.displayTimer = 10;            
+                    this.transferResultElement.value = "Success. Restarting device";
                     
                     this.uploadState = 4;                    
                     this.sendReset(); 
