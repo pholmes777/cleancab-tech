@@ -95,7 +95,7 @@
         <div class="col-35">
         </div>
         <div class="col-65">
-          <input id="firmwareResult" type='text' readOnly="true" value=""/>  
+          <label id="firmwareResult"></label>  
         </div>
       </div>
     </form>
@@ -4919,12 +4919,12 @@ class blueToothFirmware extends blueToothIf
         {
             bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
-            this.transferResultElement.value = "Failed: " + reason;
+            this.transferResultElement.innerHTML = "Failed: " + reason;
             this.displayTimer = 10;
         }
         else
         {
-            this.transferResultElement.value = "";
+            this.transferResultElement.innerHTML = "";
             this.displayTimer = 0;
             this.timer = 0;
         }
@@ -4959,7 +4959,7 @@ class blueToothFirmware extends blueToothIf
                     
                     if (this.displayTimer == 0)
                     {
-                        this.transferResultElement.value = "";
+                        this.transferResultElement.innerHTML = "";
                     }
                 }
             break;
@@ -4993,7 +4993,7 @@ class blueToothFirmware extends blueToothIf
             case 4:
                 if (expired)
                 {
-                    this.transferResultElement.value = "";
+                    this.transferResultElement.innerHTML = "";
                     bleiface.disconnect();
                 }
             break;
@@ -5065,7 +5065,7 @@ class blueToothFirmware extends blueToothIf
             
                     this.timer = 5;
                     this.displayTimer = 10;            
-                    this.transferResultElement.value = "Success. Restarting device";
+                    this.transferResultElement.innerHTML = "Success. Restarting device";
                     
                     this.uploadState = 4;                    
                     this.sendReset(); 
@@ -5217,7 +5217,7 @@ class blueToothFirmware extends blueToothIf
             {
                 this.characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
             }
-            this.versionElement = bleiface.getItem("General").getVersion();
+            this.versionElement.value = bleiface.getItem("General").getVersion();
             super.init();
         }
     }
