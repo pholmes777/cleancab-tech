@@ -4791,7 +4791,7 @@ class blueToothFirmware extends blueToothIf
         
         this.firmwareMenuItem = 0;
         this.elementMenuItem = document.getElementById("menuItemLogin");
-        this.binaryFirmwareFile = 0;
+        this.binaryFirmwareFile = null;
         this.inputFileElement = document.getElementById('firmwareInputFile');
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
         this.progressElement = document.getElementById('firmwareProgressDiv');   
@@ -4804,6 +4804,7 @@ class blueToothFirmware extends blueToothIf
         this.lastReadIdx = 0;
         this.retry = 0;
         this.timer = 0;
+        this.displayTimer = 0;
     }
     
     connect(service)
@@ -4823,14 +4824,16 @@ class blueToothFirmware extends blueToothIf
         return true;
     }
     
-    disconnect()
+    disconnected()
     {
+        super.disconnected();
+        
         if (this.firmwareMenuItem)
         {
             this.firmwareMenuItem.remove();
             this.firmwareMenuItem = 0;
         }
-        abortUpload("Disconnected");
+        this.abortUpload(null);
     }
     
     protocolVersionSet()
@@ -4875,7 +4878,10 @@ class blueToothFirmware extends blueToothIf
             this.progressElement.style.display = "none";
             return;
         }
-        this.fileNameElement.value = file.name;        
+        this.fileNameElement.value = file.name;  
+        this.sendProgressElement.style.width = "0%";
+        this.sendProgressElement.innerHTML = "0%";        
+        this.transferElement.value = "";        
         this.progressElement.style.display = "block";
         
         var reader = new FileReader();
@@ -4900,13 +4906,22 @@ class blueToothFirmware extends blueToothIf
     
     abortUpload(reason)
     {
-        bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
+        if (reason)
+        {
+            bleiface.setMessage(DBG_INFO, "Aborted: " + reason);
         
-        this.transferResultElement.innerHTML = "Failed: " + reason;
-
+            this.transferResultElement.innerHTML = "Failed: " + reason;
+            this.displayTimer = 5;
+        }
+        else
+        {
+            this.transferResultElement.innerHTML = "";
+            this.displayTimer = 0;
+        }
         this.chooseFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
         this.uploadState = 0;  
+        this.binaryFirmwareFile = null;
 
         if (wakeLockObj)        
         {
@@ -4917,43 +4932,59 @@ class blueToothFirmware extends blueToothIf
     
     tick()
     {
+        let expired = false;
+        
+        if (this.timer > 0)
+        {
+            this.timer--;
+            expired = this.timer == 0;
+        }
+        
         switch (this.uploadState)
         {
+            case 0:
+                if (this.displayTimer > 0)
+                {
+                    this.displayTimer--;
+                    
+                    if (this.displayTimer == 0)
+                    {
+                        this.transferResultElement.innerHTML = "";
+                    }
+                }
+            break;
+            
             case 1:
             case 2:
             case 3:
-                if (this.timer > 0)
+                if (expired)
                 {
-                    this.timer--;
-                    if (this.timer == 0)
+                    if (this.retry > 0)
                     {
-                        if (this.retry > 0)
-                        {
-                            this.retry--;
-                            this.timer = 3;
+                        this.retry--;
+                        this.timer = 3;
                             
-                            if (this.uploadState == 1)
-                            {                                
-                                let data = new Uint8Array(5);
-            
-                                data[0] = 0;
-                                data[1] = 0;
-                                data[2] = 0;
-                                data[3] = 0;
-                                data[4] = 0;        
-        
-                                this.write(data);
-                            }
-                            else
-                            {
-                                this.sendNextSection();
-                            }
+                        if (this.uploadState == 1)
+                        {                 
+                            this.sendStart();                            
                         }
                         else
                         {
-                            this.abortUpload("Device not responding");
+                            this.sendNextSection();
                         }
                     }
+                    else
+                    {
+                        this.abortUpload("Device not responding");
+                    }                    
+                }
+            break;
+            
+            case 4:
+                if (expired)
+                {
+                    this.transferResultElement.innerHTML = "";
+                    bleiface.disconnect();
                 }
             break;
         }
@@ -5016,7 +5047,12 @@ class blueToothFirmware extends blueToothIf
             case 3:     // done
                 if (e.target.value.getUint8(0) == 101)      // done
                 {
+                    this.abortUpload(null);
+            
+                    this.timer = 5;
+                    this.displayTimer = 5;            
                     this.transferResultElement.innerHTML = "Success. Restarting device";
+                    
                     this.uploadState = 4;                    
                     this.sendReset(); 
                     if (wakeLockObj)        
@@ -5064,6 +5100,19 @@ class blueToothFirmware extends blueToothIf
         this.write(data);
     }
     
+    sendStart()
+    {
+        let data = new Uint8Array(5);
+            
+        data[0] = 0;
+        data[1] = 0;
+        data[2] = 0;
+        data[3] = 0;
+        data[4] = 0;        
+        
+        this.write(data);
+    }
+    
     startUpload(thedata)
     {
         if ("wakeLock" in navigator)
@@ -5083,26 +5132,18 @@ class blueToothFirmware extends blueToothIf
                 })
         }
         this.lastReadIdx = 0;
+        this.timer = 3;
         this.retry = 3;
         
         this.sendProgressElement.style.width = "0%";
-        this.sendProgressElement.innerHTML = this.readIdx;
+        this.sendProgressElement.innerHTML = "0%";
         
         this.transferElement.value = this.readIdx + " of " + this.binaryFirmwareFile.length;
         this.binaryFirmwareFile = thedata;
         this.readIdx = 0;
         this.uploadState = 1;
-        this.timer = 3;
-                
-        let data = new Uint8Array(5);
-            
-        data[0] = 0;
-        data[1] = 0;
-        data[2] = 0;
-        data[3] = 0;
-        data[4] = 0;        
-        
-        this.write(data);
+           
+        this.sendStart();
         
         bleiface.setMessage(DBG_INFO, "File size=" + this.binaryFirmwareFile.length);        
     }
@@ -5167,7 +5208,6 @@ class blueToothFirmware extends blueToothIf
     
     run()
     {
-
     }
 }    
 
