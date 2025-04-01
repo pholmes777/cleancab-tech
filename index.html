@@ -5131,7 +5131,7 @@ class blueToothFirmware extends blueToothIf
             
             if (txSize > 0)
             {
-                data.set(this.binaryFirmwareFile.subarray(this.readIdx, txSize), 5);
+                data.set(this.binaryFirmwareFile.subarray(this.readIdx, this.readIdx + txSize), 5);
             }
             else
             {
