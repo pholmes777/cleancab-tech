@@ -4873,6 +4873,7 @@ class blueToothFirmware extends blueToothIf
     {
         if (this.inputFileElement)
         {
+            this.inputFileElement.value = null;
             this.chooseFileElement.disabled = true;
             this.inputFileElement.click();
         }
