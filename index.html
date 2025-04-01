@@ -4777,7 +4777,7 @@ function firmwareTick()
     var item = bleiface.getItem("Firmware");
     if (item)
     {    
-        //item.tick();
+        item.tick();
     }
 }
 
@@ -4917,6 +4917,7 @@ class blueToothFirmware extends blueToothIf
         {
             this.transferResultElement.value = "";
             this.displayTimer = 0;
+            this.timer = 0;
         }
         this.chooseFileElement.disabled = false;   
         this.progressElement.style.display = "none";    
@@ -5892,7 +5893,7 @@ class blueToothDevice
                 if (selectDisplay === "connectingDiv" ||
                     selectDisplay === "techDiv")
                 {
-                    showDiv("statusDiv");
+                //    showDiv("statusDiv");
                 }                
             }
         }
