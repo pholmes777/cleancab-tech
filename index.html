@@ -5138,8 +5138,9 @@ class blueToothFirmware extends blueToothIf
         this.sendProgressElement.style.width = "0%";
         this.sendProgressElement.innerHTML = "0%";
         
+        this.binaryFirmwareFile = thedata;        
         this.transferElement.value = this.readIdx + " of " + this.binaryFirmwareFile.length;
-        this.binaryFirmwareFile = thedata;
+
         this.readIdx = 0;
         this.uploadState = 1;
            
