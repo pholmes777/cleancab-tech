@@ -5880,8 +5880,8 @@ class blueToothDevice
             if (!result)
             {
                 this.initDone = true;
-                connectingTicks.innerHTML = "";
-                connectingState.innerHTML = "";              
+                //xxx connectingTicks.innerHTML = "";
+                //xxx connectingState.innerHTML = "";              
                 
                 this.setMessage(DBG_CONNECT, "Connected to device");
                 this.setMessage(DBG_CONNECT, "");
@@ -5893,7 +5893,7 @@ class blueToothDevice
                 if (selectDisplay === "connectingDiv" ||
                     selectDisplay === "techDiv")
                 {
-                //    showDiv("statusDiv");
+                //xxx    showDiv("statusDiv");
                 }                
             }
         }
