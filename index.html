@@ -77,6 +77,14 @@
     <form>
       <div class="row">  
         <div class="col-35">
+          <label>Current Version</label>
+        </div>        
+        <div class="col-65">
+          <input id="firmwareVersion" type='text' readOnly="true" value=""/>  
+        </div>
+      </div>
+      <div class="row">  
+        <div class="col-35">
             <input id="firmwareInputFile" type='file' accept=".bin" style="visibility:hidden;" onchange="firmwareReadFile(event)"/>  
         </div>
         <div class="col-65">
@@ -4792,6 +4800,7 @@ class blueToothFirmware extends blueToothIf
         this.firmwareMenuItem = 0;
         this.elementMenuItem = document.getElementById("menuItemLogin");
         this.binaryFirmwareFile = null;
+        this.versionElement = document.getElementById('firmwareVersion');
         this.inputFileElement = document.getElementById('firmwareInputFile');
         this.chooseFileElement = document.getElementById('firmwareChooseBtn');
         this.progressElement = document.getElementById('firmwareProgressDiv');   
@@ -5208,6 +5217,7 @@ class blueToothFirmware extends blueToothIf
             {
                 this.characteristic.addEventListener('characteristicvaluechanged', firmwareHandleNotify);
             }
+            this.versionElement = bleiface.getItem("General").getVersion();
             super.init();
         }
     }
@@ -5880,8 +5890,8 @@ class blueToothDevice
             if (!result)
             {
                 this.initDone = true;
-                //xxx connectingTicks.innerHTML = "";
-                //xxx connectingState.innerHTML = "";              
+                connectingTicks.innerHTML = "";
+                connectingState.innerHTML = "";              
                 
                 this.setMessage(DBG_CONNECT, "Connected to device");
                 this.setMessage(DBG_CONNECT, "");
@@ -5893,7 +5903,7 @@ class blueToothDevice
                 if (selectDisplay === "connectingDiv" ||
                     selectDisplay === "techDiv")
                 {
-                //xxx    showDiv("statusDiv");
+                    showDiv("statusDiv");
                 }                
             }
         }
