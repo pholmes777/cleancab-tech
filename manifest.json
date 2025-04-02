@@ -1,0 +1,33 @@
+{
+  "name": "CleanCab Pressurizer (Tech)",
+  "short_name": "CleanCab-Tech",
+  "description": "Configure your CleanCab Pressurizer",
+  "id": "/cleancab-tech",
+  "start_url": "/cleancab-tech/",
+  "display": "standalone",
+  "scope": "/cleancab-tech/",
+  "background_color": "#000000",
+  "theme_color": "#0f4a73",
+  "icons": [
+  {
+    "src": "tech-images/appicon-144.png",
+    "sizes": "144x144",
+    "type": "image/png"
+  },
+  {
+    "src": "tech-images/appicon-192.png",
+    "type": "image/png",
+    "sizes": "192x192"
+  },
+  {
+    "src": "tech-images/appicon-512.png",
+    "type": "image/png",
+    "sizes": "512x512"
+  },
+  {
+    "src": "tech-images/appicon-256.png",
+    "type": "image/png",
+    "sizes": "256x256"
+  }
+  ]
+}
