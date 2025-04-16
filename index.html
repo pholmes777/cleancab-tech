@@ -4354,7 +4354,7 @@ class blueToothStatus extends blueToothIf
             co2 = 100;
           }
 
-          sCO2Bar.style.width = co2 + 'ppm';
+          sCO2Bar.style.width = co2 + '%';
           sCO2Bar.innerHTML = readValue.getUint16(idx, true) + 'ppm';
           if (readValue.getUint8(3) == 0)
           {
