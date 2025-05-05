@@ -21,7 +21,6 @@
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
-    <a href="javascript:showDiv('recorderDiv')">Recorder</a>
     
   </div>
   
@@ -86,6 +85,7 @@
       </div>
       <div class="col-20">
         <select id="recorderSamples" style="width:50%">
+            <option value="60">60</option>
             <option value="30" selected>30</option>
             <option value="20">20</option>
             <option value="10">10</option>
@@ -4889,7 +4889,7 @@ class recorderClass
                         title:
                         {
                             display: true,
-                            text: 'Sample'
+                            text: 'Minutes'
                         }
                     },
                     y:
@@ -4941,15 +4941,7 @@ class recorderClass
 
                 while (i < this.chart.data.datasets[0].data.length)
                 {
-                    let theTime = i * this.savedSamplePeriod;
-                    
-                    let tstr = ((theTime / 60) >> 0) + ":";
-                    
-                    theTime %= 60;
-                                        
-                    tstr += ((theTime < 10) ? "0" : "") + theTime;
-
-                    filedata += tstr + "," +
+                    filedata += this.secondsToTime(i * this.savedSamplePeriod, true) + "," +
                                 this.chart.data.datasets[0].data[i] + "," +
                                 this.chart.data.datasets[1].data[i] + "," +
                                 this.chart.data.datasets[2].data[i] + "\r\n";
@@ -4964,6 +4956,19 @@ class recorderClass
                 URL.revokeObjectURL(tempLink.href);
             }
         }
+    }
+
+    secondsToTime(theTime, useHours)
+    {
+        let hours = (theTime / 3600) >> 0;
+        let mins = ((theTime % 3600) / 60) >> 0;
+        let secs = theTime % 60;
+
+        if (useHours)
+        {
+            return pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs);
+        }
+        return mins + ":" + pad2(secs);
     }
 
     startStop()
@@ -4984,8 +4989,14 @@ class recorderClass
         }
         else
         {
+            let i = 0;
+
             this.sampleRate.disabled = true;
             this.samplePeriod = this.sampleRate.value;
+            for (i = 0; i <= 30; i++)
+            {
+                this.chart.data.labels[i] = (i & 0x01) ? "" : this.secondsToTime(i * this.samplePeriod, false);
+            }
             this.started = true;
             this.stopStartBtn.value = "Stop";
             this.saveBtn.disabled = true;
