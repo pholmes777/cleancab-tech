@@ -4334,13 +4334,21 @@ class blueToothStatus extends blueToothIf
     {
         super.setRead(readValue);
 
+        let fan = this.decodeFanSpeed(readValue.getUint8(0));
+
         if (selectDisplay === "recorderDiv")
         {
-            recorderControl.statusUpdate(readValue.getUint8(0), readValue.getUint16(4, true), readValue.getUint16(idx, true));
+            if (protocolVersion >= 2)
+            {
+                recorderControl.statusUpdate(fan, readValue.getUint16(4, true), readValue.getUint16(6, true));
+            }
+            else
+            {
+                recorderControl.statusUpdate(fan, readValue.getUint16(4, true), 0);
+            }
             return;
         }
-
-        let fan = this.decodeFanSpeed(readValue.getUint8(0));
+        
         sFanSpeedBar.style.width = fan + '%';
         sFanSpeedBar.innerHTML = fan + '%';
 
@@ -4948,6 +4956,11 @@ class recorderClass
             this.started = false;
             this.stopStartBtn.value = "Start";
             this.saveBtn.disabled = false;
+            if (wakeLockObj)        
+            {
+                wakeLockObj.release();
+                wakeLockObj = null;
+            }
         }
         else
         {
@@ -4961,6 +4974,23 @@ class recorderClass
             this.chart.data.datasets[1].data = [0];
             this.chart.data.datasets[2].data = [0];
             this.chart.update();
+            
+            if ("wakeLock" in navigator)
+            {
+                navigator.wakeLock.request('screen')
+                    .then((wakeLock) => 
+                    {
+                        wakeLockObj = wakeLock;
+          
+                        wakeLockObj.addEventListener('release', () => 
+                        {
+                            wakeLockObj = null;
+                        })
+                    })
+                    .catch((err) => 
+                    {
+                    })
+            }
         }
     }
 
