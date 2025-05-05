@@ -8,6 +8,7 @@
     <!--link rel="stylesheet" type="text/css" href="static/styleph.css"-->
     <!--link rel="manifest" href="static/manifest.json"-->
   </head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.0.1/dist/chart.umd.min.js"></script>
   <body onload="init()">
 
 <!-- Simulate a smartphone / tablet -->
@@ -20,6 +21,7 @@
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
+    
   </div>
   
   <div id="connectedLinks">
@@ -33,6 +35,7 @@
     <a href="javascript:showDiv('filterDetailsDiv')">Filter Details</a>
     <a href="javascript:showDiv('filterHistoryDiv')">Filter History</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
+    <a href="javascript:showDiv('recorderDiv')">Recorder</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
   </div>
   <a href="javascript:void(0);" class="icon" onclick="toggleMenu()">
@@ -67,6 +70,29 @@
     <div class="row">
       <p id="connectingTicks"></p>
       <p id="connectingState"></p>  
+    </div>
+  </div>
+</div>
+
+<div id="recorderDiv" class="hiddenitemdiv">
+  <h3>Recording</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-35">
+        <input id="recorderStartStop" type="button" value="Start Recording" onclick="recorderStartStop(event)" disabled="true"/>
+      </div>
+      <div class="col-5">
+      </div>
+      <div class="col-20">
+      </div>
+      <div class="col-5">
+      </div>
+      <div class="col-35">
+        <input id="recorderSave" type="button" value="Save" onclick="recorderSave(event)"  disabled="true"/>
+      </div>
+    </div>
+      <canvas id="recorderChart" style="width:100%"></canvas>
+    <div>
     </div>
   </div>
 </div>
@@ -1623,6 +1649,7 @@ var calibrationHistory;
 var alarmHistory;
 var authorizeControl;
 var calibrateControl;
+var recorderControl;
 var testControl;
 
 function init()
@@ -1639,6 +1666,7 @@ function init()
     alarmHistory = new alarmHistoryClass("alarm", "Alarm");
     authorizeControl = new authorizeClass();
     calibrateControl = new calibrateClass();
+    recorderControl = new recorderClass();
     testControl = new testClass();
 
     // testing lines... removed \/
@@ -1649,7 +1677,7 @@ function init()
     //showDiv("techDiv");
     // testing lines end
     
-    setTimeout(secondTimer, 500);
+    setTimeout(halfSecondTimer, 500);
     
     techShow();
 }
@@ -4306,6 +4334,12 @@ class blueToothStatus extends blueToothIf
     {
         super.setRead(readValue);
 
+        if (selectDisplay === "recorderDiv")
+        {
+            recorderControl.statusUpdate(readValue.getUint8(0), readValue.getUint16(4, true), readValue.getUint16(idx, true));
+            return;
+        }
+
         let fan = this.decodeFanSpeed(readValue.getUint8(0));
         sFanSpeedBar.style.width = fan + '%';
         sFanSpeedBar.innerHTML = fan + '%';
@@ -4409,7 +4443,8 @@ class blueToothStatus extends blueToothIf
     run()
     {
         if (selectDisplay === "statusDiv" ||
-            selectDisplay === "status1Div")
+            selectDisplay === "status1Div" ||
+            selectDisplay === "recorderDiv")
         {
             bleiface.itemReadWithBusy(this);
         }
@@ -4737,6 +4772,260 @@ class blueToothCalibrate extends blueToothIf
         calibrateControl.handleActions(this);
     }
 }    
+//==========================================================
+//
+//          Recorder
+//
+//==========================================================
+
+function recorderSave(e)
+{
+    if (recorderControl)
+    {
+        recorderControl.save()
+    }
+}
+
+function recorderStartStop(e)
+{
+    if (recorderControl)
+    {
+        recorderControl.startStop()
+    }
+}
+
+class recorderClass
+{
+    constructor()
+    {
+        this.started = false;
+        this.index = 0;
+        this.ticks = 0;
+        this.stopStartBtn = document.getElementById("recorderStartStop");
+        this.saveBtn = document.getElementById("recorderSave");
+        this.testSpeed = 0;
+        this.testPressure = 0;
+        this.testCO2 = 400;
+        this.canvas = document.getElementById("recorderChart");
+        this.doSample = false;
+
+        this.chart = new Chart(this.canvas.getContext("2d"),
+        {
+            type: "line",
+            data:
+            {
+                labels: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30],
+                datasets: [
+                {
+                    data: [0],
+                    borderColor: "red",
+                    label: 'Fan Speed',
+                    fill: false,
+                    yAxisID: 'y',
+                },
+                {
+                    data: [0],
+                    borderColor: "green",
+                    label: 'Pressure',
+                    fill: false,
+                    yAxisID: 'y1',
+                },
+                {
+                    data: [0],
+                    borderColor: "blue",
+                    label: 'CO2',
+                    fill: false,
+                    yAxisID: 'y2',
+                }
+                ]
+            },
+            options:
+            {
+                responsive: true,
+                interaction:
+                {
+                    mode: 'index',
+                    intersect: false,
+                },
+                stacked: false,
+                animation:
+                {
+                    duration: 0,
+                },
+                plugins:
+                {
+                    title:
+                    {
+                        display: true,
+                        text: 'System chart'
+                    }
+                },
+                scales:
+                {
+                      x:
+                      {
+                        min: 0,
+                        max: 30,
+                        title:
+                        {
+                            display: true,
+                            text: 'Minutes'
+                        }
+                    },
+                    y:
+                    {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        color: "red",
+                        min: 0,
+                        max: 100,
+                    },
+                    y1:
+                    {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        min : 0,
+                        max : 200,
+                        grid:
+                        {
+                            drawOnChartArea: false,
+                        },
+                    },
+                    y2:
+                    {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        min : 0,
+                        max : 5000,
+                        grid:
+                        {
+                            drawOnChartArea: false,
+                        },
+                    },
+                }
+            }
+        });
+    }
+
+    save()
+    {
+        if (this.chart)
+        {
+            if (this.chart.data.datasets[0].data.length > 1)
+            {
+                let filedata = "Time,Fan Speed,Pressure(pa),CO2(ppm)\r\n";
+                let i = 0;
+
+                while (i < this.chart.data.datasets[0].data.length)
+                {
+                    let tstr = (i >> 1) + ":";
+                    tstr += (i & 0x01) ? "30" : "00";
+
+                    filedata += tstr + "," +
+                                this.chart.data.datasets[0].data[i] + "," +
+                                this.chart.data.datasets[1].data[i] + "," +
+                                this.chart.data.datasets[2].data[i] + "\r\n";
+                    i++;
+                }
+                var tempLink = document.createElement("a");
+                var taBlob = new Blob([filedata], {type: 'text/plain'});
+                tempLink.setAttribute('href', URL.createObjectURL(taBlob));
+                tempLink.setAttribute('download', "test_report.txt");
+                tempLink.click();
+
+                URL.revokeObjectURL(tempLink.href);
+            }
+        }
+    }
+
+    startStop()
+    {
+        if (this.started)
+        {
+            this.started = false;
+            this.stopStartBtn.value = "Start";
+            this.saveBtn.disabled = false;
+        }
+        else
+        {
+            this.started = true;
+            this.stopStartBtn.value = "Stop";
+            this.saveBtn.disabled = true;
+            this.ticks = 0;
+            this.index = 0;
+            this.doSample = true;
+            this.chart.data.datasets[0].data = [0];
+            this.chart.data.datasets[1].data = [0];
+            this.chart.data.datasets[2].data = [0];
+            this.chart.update();
+        }
+    }
+
+    addRecord(theSpeed, thePressure, theCO2)
+    {
+        console.log("Index=" + this.index);
+        if (this.index == 0)
+        {
+            this.chart.data.datasets[0].data[0] = theSpeed;
+            this.chart.data.datasets[1].data[0] = thePressure;
+            this.chart.data.datasets[2].data[0] = theCO2;
+            this.index++;
+        }
+        else
+        {
+            this.chart.data.datasets[0].data.push(theSpeed);
+            this.chart.data.datasets[1].data.push(thePressure);
+            this.chart.data.datasets[2].data.push(theCO2);
+            this.index++;
+            if (this.index > 30)
+            {
+                if (this.started)
+                {
+                    startStop();
+                }
+            }
+        }
+        this.chart.update();
+    }
+
+    statusUpdate(fanSpeed, pressure, CO2)
+    {
+        if (this.started && this.doSample)
+        {
+            this.doSample = false;
+            this.addRecord(fanSpeed, pressure, CO2);
+        }
+    }
+
+    tick()
+    {
+        if (this.started)
+        {
+            if (selectDisplay === "recorderDiv")
+            {
+                this.ticks++;
+                if (this.ticks >= 60)
+                {
+                    this.ticks = 0;
+                    if (this.doSample)
+                    {
+                        // missed a sample.
+
+                        this.addRecord(0, 0, 0);
+                    }
+                    this.doSample = true;
+                }
+            }
+            else
+            {
+                startStop();
+            }
+        }
+    }
+}
 
 //==========================================================
 //
@@ -6380,7 +6669,7 @@ function disconnect()
     //}
 }
 
-function secondTimer()
+function halfSecondTimer()
 {
     if (authorizeControl)
     {
@@ -6398,9 +6687,13 @@ function secondTimer()
     {
         bleiface.tick();
     }
+    if (recorderControl)
+    {
+        recorderControl.tick();
+    }
     firmwareTick();
 
-    setTimeout(secondTimer, 500);
+    setTimeout(halfSecondTimer, 500);
 }
 
 function bluetoothPoll()
