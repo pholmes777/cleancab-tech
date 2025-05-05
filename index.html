@@ -84,6 +84,7 @@
       <div class="col-5">
       </div>
       <div class="col-20">
+        <label id="recorderSpin">-</label>
       </div>
       <div class="col-5">
       </div>
@@ -4811,6 +4812,7 @@ class recorderClass
         this.ticks = 0;
         this.stopStartBtn = document.getElementById("recorderStartStop");
         this.saveBtn = document.getElementById("recorderSave");
+        this.spinLabel = document.getElementById("recorderSpin");
         this.testSpeed = 0;
         this.testPressure = 0;
         this.testCO2 = 400;
@@ -4956,6 +4958,7 @@ class recorderClass
             this.started = false;
             this.stopStartBtn.value = "Start";
             this.saveBtn.disabled = false;
+            this.spinLabel.innerHTML = "";
             if (wakeLockObj)        
             {
                 wakeLockObj.release();
@@ -4974,6 +4977,7 @@ class recorderClass
             this.chart.data.datasets[1].data = [0];
             this.chart.data.datasets[2].data = [0];
             this.chart.update();
+            this.spinLabel.innerHTML = "-";
             
             if ("wakeLock" in navigator)
             {
@@ -5047,6 +5051,13 @@ class recorderClass
                         this.addRecord(0, 0, 0);
                     }
                     this.doSample = true;
+                }
+                switch (this.ticks % 4)
+                {
+                    case 0: this.spinLabel.innerHTML = "-"; break;
+                    case 1: this.spinLabel.innerHTML = "/"; break;
+                    case 2: this.spinLabel.innerHTML = "|"; break;
+                    case 3: this.spinLabel.innerHTML = "\\"; break;
                 }
             }
             else
