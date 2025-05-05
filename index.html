@@ -21,6 +21,7 @@
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
+    <a href="javascript:showDiv('recorderDiv')">Recorder</a>
     
   </div>
   
@@ -84,7 +85,13 @@
       <div class="col-5">
       </div>
       <div class="col-20">
-        <label id="recorderSpin">-</label>
+        <select id="recorderSamples" style="width:50%">
+            <option value="30" selected>30</option>
+            <option value="20">20</option>
+            <option value="10">10</option>
+            <option value="5">5</option>
+        </select>
+        <label id="recorderSpin"></label>
       </div>
       <div class="col-5">
       </div>
@@ -4812,12 +4819,15 @@ class recorderClass
         this.ticks = 0;
         this.stopStartBtn = document.getElementById("recorderStartStop");
         this.saveBtn = document.getElementById("recorderSave");
+        this.sampleRate = document.getElementById("recorderSamples");
         this.spinLabel = document.getElementById("recorderSpin");
         this.testSpeed = 0;
         this.testPressure = 0;
         this.testCO2 = 400;
         this.canvas = document.getElementById("recorderChart");
         this.doSample = false;
+        this.samplePeriod = 30;
+        this.savedSamplePeriod = 30;
 
         this.chart = new Chart(this.canvas.getContext("2d"),
         {
@@ -4828,14 +4838,14 @@ class recorderClass
                 datasets: [
                 {
                     data: [0],
-                    borderColor: "red",
+                    borderColor: "green",
                     label: 'Fan Speed',
                     fill: false,
                     yAxisID: 'y',
                 },
                 {
                     data: [0],
-                    borderColor: "green",
+                    borderColor: "red",
                     label: 'Pressure',
                     fill: false,
                     yAxisID: 'y1',
@@ -4931,8 +4941,13 @@ class recorderClass
 
                 while (i < this.chart.data.datasets[0].data.length)
                 {
-                    let tstr = (i >> 1) + ":";
-                    tstr += (i & 0x01) ? "30" : "00";
+                    let theTime = i * this.savedSamplePeriod;
+                    
+                    let tstr = ((theTime / 60) >> 0) + ":";
+                    
+                    theTime %= 60;
+                                        
+                    tstr += ((theTime < 10) ? "0" : "") + theTime;
 
                     filedata += tstr + "," +
                                 this.chart.data.datasets[0].data[i] + "," +
@@ -4964,9 +4979,13 @@ class recorderClass
                 wakeLockObj.release();
                 wakeLockObj = null;
             }
+            this.sampleRate.disabled = false;
+            this.savedSamplePeriod = this.samplePeriod;
         }
         else
         {
+            this.sampleRate.disabled = true;
+            this.samplePeriod = this.sampleRate.value;
             this.started = true;
             this.stopStartBtn.value = "Stop";
             this.saveBtn.disabled = true;
@@ -4977,7 +4996,7 @@ class recorderClass
             this.chart.data.datasets[1].data = [0];
             this.chart.data.datasets[2].data = [0];
             this.chart.update();
-            this.spinLabel.innerHTML = "-";
+            this.spinLabel.innerHTML = "0";
             
             if ("wakeLock" in navigator)
             {
@@ -5000,7 +5019,6 @@ class recorderClass
 
     addRecord(theSpeed, thePressure, theCO2)
     {
-        console.log("Index=" + this.index);
         if (this.index == 0)
         {
             this.chart.data.datasets[0].data[0] = theSpeed;
@@ -5041,7 +5059,10 @@ class recorderClass
             if (selectDisplay === "recorderDiv")
             {
                 this.ticks++;
-                if (this.ticks >= 60)
+                
+                let secondTicks = this.ticks >> 1;
+                
+                if (secondTicks >= this.samplePeriod)
                 {
                     this.ticks = 0;
                     if (this.doSample)
@@ -5052,13 +5073,7 @@ class recorderClass
                     }
                     this.doSample = true;
                 }
-                switch (this.ticks % 4)
-                {
-                    case 0: this.spinLabel.innerHTML = "-"; break;
-                    case 1: this.spinLabel.innerHTML = "/"; break;
-                    case 2: this.spinLabel.innerHTML = "|"; break;
-                    case 3: this.spinLabel.innerHTML = "\\"; break;
-                }
+                this.spinLabel.innerHTML = secondTicks;
             }
             else
             {
