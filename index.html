@@ -21,6 +21,7 @@
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
+    <a href="javascript:showDiv('recorderDiv')">Recorder</a>    
     
   </div>
   
@@ -78,20 +79,43 @@
   <h3>Recording</h3>
   <div class="container">
     <div class="row">
-      <div class="col-35">
-        <input id="recorderStartStop" type="button" value="Start Recording" onclick="recorderStartStop(event)"/>
+      <div class="col-25">
+        <label>Sample Rate</label>
       </div>
-      <div class="col-5">
-      </div>
-      <div class="col-20">
-        <select id="recorderSamples" style="width:50%">
+      <div class="col-65">
+        <select id="recorderSamples" style="width:100%">
             <option value="60">60</option>
             <option value="30" selected>30</option>
-            <option value="20">20</option>
             <option value="10">10</option>
             <option value="5">5</option>
         </select>
-        <label id="recorderSpin"></label>
+      </div>
+      <div class="col-10">
+        <label class="units">secs</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-25">
+        <label>Duration</label>
+      </div>
+      <div class="col-65">
+        <select id="recorderLength" style="width:100%">
+            <option value="60">60</option>
+            <option value="30">30</option>
+            <option value="15" selected>15</option>
+            <option value="10">10</option>
+            <option value="5">5</option>
+        </select>
+      </div>
+      <div class="col-10">
+        <label class="units">mins</label>
+      </div>      
+    </div>    
+    <div class="row">
+      <div class="col-25">
+      </div>
+      <div class="col-35">
+        <input id="recorderStartStop" type="button" value="Start Recording" onclick="recorderStartStop(event)"/>
       </div>
       <div class="col-5">
       </div>
@@ -4819,15 +4843,18 @@ class recorderClass
         this.ticks = 0;
         this.stopStartBtn = document.getElementById("recorderStartStop");
         this.saveBtn = document.getElementById("recorderSave");
-        this.sampleRate = document.getElementById("recorderSamples");
-        this.spinLabel = document.getElementById("recorderSpin");
+        this.sampleRateCbox = document.getElementById("recorderSamples");
+        this.sampleLengthCbox = document.getElementById("recorderLength")
         this.testSpeed = 0;
         this.testPressure = 0;
         this.testCO2 = 400;
         this.canvas = document.getElementById("recorderChart");
         this.doSample = false;
+        this.sampleTime = 0;
         this.samplePeriod = 30;
+        this.sampleDuration = 15 * 60;
         this.savedSamplePeriod = 30;
+        this.numSamples = 0;
 
         this.chart = new Chart(this.canvas.getContext("2d"),
         {
@@ -4966,11 +4993,17 @@ class recorderClass
 
         if (useHours)
         {
-            return pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs);
+            return '"' + pad2(hours) + ":" + pad2(mins) + ":" + pad2(secs) + '"';
         }
         return mins + ":" + pad2(secs);
     }
 
+            
+    updateStopStartBtn()
+    {
+        this.stopStartBtn.value = "Stop  (" + this.secondsToTime(this.sampleDuration - this.sampleTime, false) + ")";    
+    }
+            
     startStop()
     {
         if (this.started)
@@ -4978,27 +5011,33 @@ class recorderClass
             this.started = false;
             this.stopStartBtn.value = "Start";
             this.saveBtn.disabled = false;
-            this.spinLabel.innerHTML = "";
             if (wakeLockObj)        
             {
                 wakeLockObj.release();
                 wakeLockObj = null;
             }
-            this.sampleRate.disabled = false;
+            this.sampleRateCbox.disabled = false;
+            this.sampleLengthCbox.disabled = false;
             this.savedSamplePeriod = this.samplePeriod;
         }
         else
         {
             let i = 0;
 
-            this.sampleRate.disabled = true;
-            this.samplePeriod = this.sampleRate.value;
-            for (i = 0; i <= 30; i++)
+            this.sampleTime = 0;
+            this.sampleRateCbox.disabled = true;
+            this.sampleLengthCbox.disabled = true;
+            this.samplePeriod = this.sampleRateCbox.value;
+            this.sampleDuration = this.sampleLengthCbox.value * 60;
+            this.numSamples = (this.sampleDuration / this.samplePeriod) >> 0;
+            this.chart.data.labels = [];
+            for (i = 0; i < this.numSamples; i++)
             {
-                this.chart.data.labels[i] = (i & 0x01) ? "" : this.secondsToTime(i * this.samplePeriod, false);
+                this.chart.data.labels.push((i & 0x01) ? "" : this.secondsToTime(i * this.samplePeriod, false));
             }
             this.started = true;
-            this.stopStartBtn.value = "Stop";
+            this.updateStopStartBtn();
+            
             this.saveBtn.disabled = true;
             this.ticks = 0;
             this.index = 0;
@@ -5007,7 +5046,6 @@ class recorderClass
             this.chart.data.datasets[1].data = [0];
             this.chart.data.datasets[2].data = [0];
             this.chart.update();
-            this.spinLabel.innerHTML = "0";
             
             if ("wakeLock" in navigator)
             {
@@ -5043,7 +5081,7 @@ class recorderClass
             this.chart.data.datasets[1].data.push(thePressure);
             this.chart.data.datasets[2].data.push(theCO2);
             this.index++;
-            if (this.index > 30)
+            if (this.index >= this.numSamples)
             {
                 if (this.started)
                 {
@@ -5071,20 +5109,24 @@ class recorderClass
             {
                 this.ticks++;
                 
-                let secondTicks = this.ticks >> 1;
-                
-                if (secondTicks >= this.samplePeriod)
+                if (this.ticks & 0x01)
                 {
-                    this.ticks = 0;
-                    if (this.doSample)
+                    let secondTicks = this.ticks >> 1;
+                
+                    if (secondTicks >= this.samplePeriod)
                     {
-                        // missed a sample.
+                        this.ticks = 0;
+                        if (this.doSample)
+                        {
+                            // missed a sample.
 
-                        this.addRecord(0, 0, 0);
+                            this.addRecord(0, 0, 0);
+                        }
+                        this.doSample = true;
                     }
-                    this.doSample = true;
+                    this.sampleTime++;
+                    this.updateStopStartBtn()
                 }
-                this.spinLabel.innerHTML = secondTicks;
             }
             else
             {
