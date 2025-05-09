@@ -20,8 +20,7 @@
   <div id="idleLinks">
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
-    <a href="javascript:showDiv('contactDiv')">Contact</a>
-    <a href="javascript:showDiv('recorderDiv')">Recorder</a>    
+    <a href="javascript:showDiv('contactDiv')">Contact</a>  
     
   </div>
   
@@ -5033,7 +5032,7 @@ class recorderClass
             this.chart.data.labels = [];
             for (i = 0; i < this.numSamples; i++)
             {
-                this.chart.data.labels.push((i & 0x01) ? "" : this.secondsToTime(i * this.samplePeriod, false));
+                this.chart.data.labels.push(this.secondsToTime(i * this.samplePeriod, false));
             }
             this.started = true;
             this.updateStopStartBtn();
