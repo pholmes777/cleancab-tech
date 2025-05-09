@@ -5010,7 +5010,26 @@ class recorderClass
 
     updateStopStartBtn()
     {
-        this.stopStartBtn.value = "Stop  (" + this.secondsToTime(this.sampleDuration - this.sampleTime, false) + ")";    
+        if (this.started)
+        {
+            if (this.index == 0)
+            {
+                this.stopStartBtn.value = "Stop  (starting)"; 
+            }
+            else
+            {
+                let remaining = this.sampleDuration - this.sampleTime;
+        
+                if (remaining < 0)
+                {
+                    this.stopStartBtn.value = "Stop  (finishing)";    
+                }        
+                else
+                {   
+                    this.stopStartBtn.value = "Stop  (" + this.secondsToTime(remaining, false) + ")";    
+                }
+            }
+        }
     }
             
     startStop()
@@ -5036,8 +5055,7 @@ class recorderClass
             this.sampleLengthCbox.disabled = true;
             this.samplePeriod = parseInt(this.sampleRateCbox.value);
             this.sampleDuration = parseInt(this.sampleLengthCbox.value) * 60;
-            this.numSamples = (this.sampleDuration / this.samplePeriod) >> 0;
-            this.numSamples++;
+            this.numSamples = ((this.sampleDuration / this.samplePeriod) >> 0) + 1;
             this.setupXAxis();
             this.started = true;
             this.updateStopStartBtn();
@@ -5112,20 +5130,22 @@ class recorderClass
             if (selectDisplay === "recorderDiv")
             {
                 this.ticks++;
-                
+                                                
                 if (this.ticks & 0x01)
                 {
-                    let secondTicks = this.ticks >> 1;
+                    let secondTicks = (this.ticks >> 1) % this.samplePeriod;
                 
-                    if (secondTicks >= this.samplePeriod)
+                    if (secondTicks == (this.samplePeriod - 1))
                     {
-                        this.ticks = 0;
                         if (this.doSample)
                         {
                             // missed a sample.
 
                             this.addRecord(0, 0, 0);
                         }
+                    }
+                    if (secondTicks == 0)
+                    {
                         this.doSample = true;
                     }
                     this.sampleTime++;
