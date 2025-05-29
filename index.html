@@ -1543,8 +1543,7 @@
 
 if ('serviceWorker' in navigator) 
 {
-  navigator.serviceWorker.register('serviceworker.js', {scope: './cleancab-tech/'})
-//  navigator.serviceWorker.register('static/serviceworker.js')
+  navigator.serviceWorker.register('serviceworker.js', {scope: '/cleancab-tech/'})
     .then(function(registration) 
     {
         console.log('ServiceWorker registration successful!');
