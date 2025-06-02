@@ -3,7 +3,7 @@
   "short_name": "CleanCab-Tech",
   "description": "Configure your CleanCab Pressurizer",
   "id": "/cleancab-tech",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "scope": "/",
   "background_color": "#000000",
