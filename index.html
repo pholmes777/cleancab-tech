@@ -6990,15 +6990,15 @@ async function generatePDF()
   addRow("  Recirculation Filter life", fieldFilterLifeRecirculation.value);  
 
   addRow({content: "Filter : Main", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
-  addRow("  Part Number", document.querySelector("#filterSerialNumber").value);
-  addRow("  Serial Number", document.querySelector("#filterSerialNumber").value);    
+  addRow("  Part Number", document.querySelector("#mainPartNumber").value);
+  addRow("  Serial Number", document.querySelector("#mainSerialNumber").value);    
   
   addRow({content: "Filter : HEPA", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
-  addRow("  Part Number", document.querySelector("#hepaSerialNumber").value);
+  addRow("  Part Number", document.querySelector("#hepaPartNumber").value);
   addRow("  Serial Number", document.querySelector("#hepaSerialNumber").value); 
   
   addRow({content: "Filter : Recirculation", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
-  addRow("  Part Number", document.querySelector("#recirculationSerialNumber").value);
+  addRow("  Part Number", document.querySelector("#recirculationPartNumber").value);
   addRow("  Serial Number", document.querySelector("#recirculationSerialNumber").value);        
 
   // Generate table
