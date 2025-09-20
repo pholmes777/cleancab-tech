@@ -22,8 +22,7 @@
   <div id="idleLinks">
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
-    <a href="javascript:showDiv('contactDiv')">Contact</a>  
-    <a href="javascript:showDiv('pdfDiv')">Generate Report</a>    
+    <a href="javascript:showDiv('contactDiv')">Contact</a> 
   </div>
   
   <div id="connectedLinks">
@@ -85,7 +84,7 @@
         <label>Customer</label>
       </div>
       <div class="col-75">
-        <input type="text" id="pdfCustomerName" readonly value="customer business name">
+        <input type="text" id="pdfCustomerName" value="" placeholder="customer business name">
       </div>
     </div>
     <div class="row">
@@ -93,7 +92,7 @@
         <label>Contact</label>
       </div>
       <div class="col-75">
-        <input type="text" id="pdfCustomerContact" readonly value="customer contact details">
+        <input type="text" id="pdfCustomerContact" value="" placeholder="customer contact details">
       </div>
     </div>
     <div class="row">
@@ -101,7 +100,7 @@
         <label>Test Pressure</label>
       </div>
       <div class="col-75">
-        <input type="text" id="pdfTestPressure" readonly value="test pressure">
+        <input type="text" id="pdfTestPressure" value="" placeholder="test pressure">
       </div>
     </div>      
     <div class="row">
@@ -6942,7 +6941,7 @@ async function generatePDF()
   doc.setFontSize(12);
 
   addRow("Customer Name", document.querySelector("#pdfCustomerName").value);
-  addRow("Customer Contact", document.querySelector("#pdfTestPressure").value);
+  addRow("Customer Contact", document.querySelector("#pdfCustomerContact").value);
 
   var item = bleiface.getItem("Commission");
   //addRow({ content: 'Commission', rowSpan: 4 }, item.)
@@ -6957,7 +6956,7 @@ async function generatePDF()
   
   addRow("Target Pressure", fieldTargetPressure.value);
 
-  addRow("Test Pressure", document.querySelector("#pdfCustomerContact").value);
+  addRow("Test Pressure", document.querySelector("#pdfTestPressure").value);
   
   addRow({content: "Alarm: Pressure", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
   addRow("  Minimum", fieldPressureThresholdMin.value);
