@@ -9,6 +9,8 @@
     <!--link rel="manifest" href="static/manifest.json"-->
   </head>
   <script src="chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
   <body onload="init()">
 
 <!-- Simulate a smartphone / tablet -->
@@ -21,6 +23,7 @@
     <a href="javascript:connect()">Connect</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>  
+    <a href="javascript:showDiv('pdfDiv')">Generate Report</a>    
   </div>
   
   <div id="connectedLinks">
@@ -35,6 +38,7 @@
     <a href="javascript:showDiv('filterHistoryDiv')">Filter History</a>
     <a href="javascript:showDiv('techDiv')">Registered Details</a>
     <a href="javascript:showDiv('recorderDiv')">Recorder</a>
+    <a href="javascript:showDiv('pdfDiv')">Generate Report</a>
     <a href="javascript:showDiv('contactDiv')">Contact</a>
   </div>
   <a href="javascript:void(0);" class="icon" onclick="toggleMenu()">
@@ -70,6 +74,43 @@
       <p id="connectingTicks"></p>
       <p id="connectingState"></p>  
     </div>
+  </div>
+</div>
+
+<div id="pdfDiv" class="hiddenitemdiv">
+  <h3>Generate Report</h3>
+  <div class="container">
+    <div class="row">
+      <div class="col-25">
+        <label>Customer</label>
+      </div>
+      <div class="col-75">
+        <input type="text" id="pdfCustomerName" readonly value="customer business name">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-25">
+        <label>Contact</label>
+      </div>
+      <div class="col-75">
+        <input type="text" id="pdfCustomerContact" readonly value="customer contact details">
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-25">
+        <label>Test Pressure</label>
+      </div>
+      <div class="col-75">
+        <input type="text" id="pdfTestPressure" readonly value="test pressure">
+      </div>
+    </div>      
+    <div class="row">
+      <div class="col-25">
+      </div>
+      <div class="col-75">
+        <button onclick="generatePDF()">Download PDF</button>
+      </div>
+    </div>  
   </div>
 </div>
 
@@ -6850,6 +6891,152 @@ window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
     alert("Error occured: " + errorMsg);//or any message
     return false;
 }
+
+let tableData = [];
+
+// Add rows dynamically
+function addRow(name, value) 
+{
+  tableData.push([name, value]);
+}
+
+async function generatePDF() 
+{
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  // Load logo image (base64 or URL)
+  const logoUrl = 'tech/logo.png'; 
+  const logoImg = await loadImageAsBase64(logoUrl);
+
+  // Add logo at the top
+  doc.addImage(logoImg, 'PNG', 15, 10, 100, 28); // x, y, width, height
+
+  doc.setFontSize(8);
+  doc.setTextColor(50); // dark gray
+  doc.text(
+    "This system adheres to the standards established by ISO 23875:2023 and RS20 regulations for mobile plant pressuriser systems",
+    15,
+    45,
+    { maxWidth: 100 }
+  );
+
+  const boxX = 120;
+  const boxY = 10;
+  const boxWidth = 80;
+  const boxHeight = 28;
+  const radius = 3;
+
+  // Draw rounded rectangle
+  doc.setFillColor(255, 255, 0); // yellow
+  doc.roundedRect(boxX, boxY, boxWidth, boxHeight, radius, radius, 'F');
+
+  // Add contact text inside box
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(0); // black
+  doc.text("Contact: 0427 477 740", boxX + 5, boxY + 10);
+  doc.text("Email: info@cleancab.au", boxX + 5, boxY + 20);
+
+  // Add some spacing
+  doc.setFontSize(12);
+
+  addRow("Customer Name", document.querySelector("#pdfCustomerName").value);
+  addRow("Customer Contact", document.querySelector("#pdfTestPressure").value);
+
+  var item = bleiface.getItem("Commission");
+  //addRow({ content: 'Commission', rowSpan: 4 }, item.)
+  addRow("Installed Date", item.savedInstalledDate);
+  addRow("Installers Company", item.savedInstallerCompany);
+  addRow("Installer Contact", item.savedInstallerPhone);
+  addRow("Installed By", item.savedInstallerName);
+  
+  addRow("Machine Make Model", item.savedMachineName);
+  addRow("Machine Serial Number", item.savedPlantNumber);
+  addRow("Machine Hours", item.savedPlantHours);
+  
+  addRow("Target Pressure", fieldTargetPressure.value);
+
+  addRow("Test Pressure", document.querySelector("#pdfCustomerContact").value);
+  
+  addRow({content: "Alarm: Pressure", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Minimum", fieldPressureThresholdMin.value);
+  addRow("  Maximum", fieldPressureThresholdMax.value); 
+  addRow("  On Time", fieldPressureOnTime.value);
+  addRow("  Off Time", fieldPressureOffTime.value); 
+
+  addRow({content: "Alarm: CO2", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Alarm Threshold", fieldCO2AlarmThreshold.value);
+  addRow("  Warning Threshold", fieldCO2WarningThreshold.value); 
+  addRow("  On Time", fieldCO2AlarmOnTime.value);
+  addRow("  Off Time", fieldCO2AlarmOffTime.value); 
+
+  addRow({content: "Alarm: Fan", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Threshold", fieldFanThreshold.value);
+  addRow("  On Time", fieldFanOnTime.value);
+  addRow("  Off Time", fieldFanOffTime.value); 
+  
+  addRow({content: "Alarm: Muting", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Mute Alarm duration", fieldMuteDuration.value);
+  addRow("  Mute Information duration", fieldMuteInfoDuration.value);
+  
+  addRow({content: "Settings : CO2 Flush", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Threshold to start", fieldCO2FlushLevelOn.value);
+  addRow("  Thresold to stop", fieldCO2FlushLevelOff.value);
+  addRow("  Presure to Flush at", fieldCO2FlushTarget.value);   
+  
+  addRow({content: "Settings : Filter Life", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Main Filter life", fieldFilterLifeMain.value);
+  addRow("  Hepa Filter life", fieldFilterLifeHepa.value);    
+  addRow("  Recirculation Filter life", fieldFilterLifeRecirculation.value);  
+
+  addRow({content: "Filter : Main", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Part Number", document.querySelector("#filterSerialNumber").value);
+  addRow("  Serial Number", document.querySelector("#filterSerialNumber").value);    
+  
+  addRow({content: "Filter : HEPA", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Part Number", document.querySelector("#hepaSerialNumber").value);
+  addRow("  Serial Number", document.querySelector("#hepaSerialNumber").value); 
+  
+  addRow({content: "Filter : Recirculation", colSpan:2, styles: { halign: 'left', fillColor: [220, 220, 220], fontStyle: 'bold' }}, "");
+  addRow("  Part Number", document.querySelector("#recirculationSerialNumber").value);
+  addRow("  Serial Number", document.querySelector("#recirculationSerialNumber").value);        
+
+  // Generate table
+  doc.autoTable({
+    startY: 55,
+    //head: [['Item Name', 'Value']],
+    body: tableData,
+    columnStyles: {
+        0: { cellWidth: 80 },
+        1: { cellWidth: 'auto'}
+    },
+    theme: 'grid'
+  });
+
+  // Save PDF
+  doc.save('items.pdf');
+}
+
+    // Helper to convert image URL to base64
+    function loadImageAsBase64(url) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = url;
+      });
+    }
+
+
 
 </script>
 
