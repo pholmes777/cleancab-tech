@@ -62,7 +62,7 @@
   <h3>Connection</h3>
   <div class="container">
     <div class="row">
-        <p id="connectingVersion">Cleancab App Version: 1.08</p>
+        <p id="connectingVersion">Cleancab App Version: 1.09</p>
     </div>
     <div class="row">
       <div style="width: 100%;height: 150px;background-image: url('tech/cleancab.png'); background-repeat: no-repeat; background-size: contain; background-position: center;">
@@ -1114,7 +1114,7 @@
       </div>
       <div class="row">  
         <div class="col-40">
-          <label>Fixed Fan Speed</label>
+          <label id="ffixedSpeedLbl">Fixed Fan Speed</label>
         </div>
         <div class="col-5">
           <div class="tooltip">?<span class="tooltiptext">The required fan speed</span></div>
@@ -1311,6 +1311,19 @@
       </div>
       <h3>CO2 - Alarm</h3>
       <div class="container">
+        <div class="row" id="fasCO2AlarmEnableDiv">
+          <div class="col-40">
+            <label>Enable CO2 Alarms</label>
+          </div>
+          <div class="col-5">
+          </div>
+          <div class="col-45">
+            <label class="switch">
+              <input id="fasCO2AlarmEnable" type="checkbox" onclick="co2AlarmEnableClicked(0)">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </div>
         <div class="row">  
           <div class="col-40">
             <label>Warning Target</label>
@@ -1319,7 +1332,7 @@
             <div class="tooltip">?<span class="tooltiptext">Warning level for CO2 in the cabin</span></div>
           </div>
           <div class="col-45">
-            <input type="number" id="fasCO2WarningThreshold" min="400" max="10000" placeholder="1000" required="true">
+            <input type="number" id="fasCO2WarningThreshold" min="400" max="40000" placeholder="1000" required="true">
           </div>
           <div class="col-10">
             <label class="units">ppm</label>
@@ -1333,7 +1346,7 @@
             <div class="tooltip">?<span class="tooltiptext">Alarm level for CO2 in the cabin</span></div>
           </div>
           <div class="col-45">
-            <input type="number" id="fasCO2AlarmThreshold" min="400" max="10000" placeholder="1000" required="true">
+            <input type="number" id="fasCO2AlarmThreshold" min="400" max="40000" placeholder="1000" required="true">
           </div>
           <div class="col-10">
             <label class="units">ppm</label>
@@ -1503,9 +1516,6 @@
           </div>
         </div>
       </div>
-
-
-
       <h3>CO2 Flush</h3>
       <div class="container">
         <div class="row">  
@@ -1516,7 +1526,7 @@
             <div class="tooltip">?<span class="tooltiptext">The CO2 level to start the flush process</span></div>
           </div>
           <div class="col-45">
-            <input type="number" id="fasCO2FlushLevelOn" min="1000" max="10000" placeholder="1500" required="true">
+            <input type="number" id="fasCO2FlushLevelOn" min="1000" max="40000" placeholder="1500" required="true">
           </div>
           <div class="col-10">
             <label class="units">ppm</label>
@@ -1530,7 +1540,7 @@
             <div class="tooltip">?<span class="tooltiptext">The CO2 level to stop the flush process</span></div>
           </div>
           <div class="col-45">
-            <input type="number" id="fasCO2FlushLevelOff" min="500" max="10000" placeholder="1000" required="true">
+            <input type="number" id="fasCO2FlushLevelOff" min="500" max="40000" placeholder="1000" required="true">
           </div>
           <div class="col-10">
             <label class="units">ppm</label>
@@ -1754,6 +1764,7 @@ function init()
     // testing lines... removed \/
     onDisconnected();
     //protocolVersion = 2;
+    //supportedBitmap = 3;
     //authorizeControl.setAuthorized(true);
     //bleiface.protocolVersionSet();
     //showDiv("techDiv");
@@ -1858,6 +1869,18 @@ function showDiv(divName)
 //      Helper functions
 //
 //===================================================
+
+function co2AlarmEnableClicked()
+{
+    fieldCO2WarningThreshold.disabled = !fieldCO2AlarmEnable.checked;
+    fieldCO2AlarmThreshold.disabled = !fieldCO2AlarmEnable.checked;
+    fieldCO2AlarmOnTime.disabled = !fieldCO2AlarmEnable.checked;
+    fieldCO2AlarmOffTime.disabled = !fieldCO2AlarmEnable.checked;
+
+    fieldCO2FlushLevelOn.disabled =  !fieldCO2AlarmEnable.checked;
+    fieldCO2FlushLevelOff.disabled = !fieldCO2AlarmEnable.checked;
+    fieldCO2FlushTarget.disabled = !fieldCO2AlarmEnable.checked;
+}
 
 function showDetailsDiv(frecId)
 {
@@ -4037,6 +4060,8 @@ const fieldPressureOnTime = document.querySelector("#fasPressureOnTime");
 const fieldPressureOffTime = document.querySelector("#fasPressureOffTime");
 const fieldPressureNumSamples = document.querySelector("#fasPressureNumSamples");
 
+const fieldCO2AlarmEnableDiv = document.querySelector("#fasCO2AlarmEnableDiv");
+const fieldCO2AlarmEnable = document.querySelector("#fasCO2AlarmEnable");
 const fieldCO2AlarmThreshold = document.querySelector("#fasCO2AlarmThreshold");
 const fieldCO2WarningThreshold = document.querySelector("#fasCO2WarningThreshold");
 const fieldCO2AlarmOnTime = document.querySelector("#fasCO2AlarmOnTime");
@@ -4078,7 +4103,10 @@ alarmSettingForm.addEventListener("submit", (event) =>
     view.setUint32(28, fieldCO2AlarmOffTime.value * 1000, true);
     
     view.setUint32(32, fieldCO2AlarmThreshold.value, true);
-    view.setUint32(36, fieldCO2AlarmOnTime.value * 1000, true);
+    if (fieldCO2AlarmEnable.checked)
+        view.setUint32(36, fieldCO2AlarmOnTime.value * 1000, true);
+    else
+        view.setUint32(36, 1, true);
     view.setUint32(40, fieldCO2AlarmOffTime.value * 1000, true);    
     view.setUint32(44, 2, true);            // sample time
     view.setUint32(48, fieldCO2NumSamples.value, true);                 // number of samples
@@ -4140,7 +4168,14 @@ class blueToothAlarmSettings extends blueToothIf
         
         fieldCO2WarningThreshold.value = readValue.getUint32(20, true);
         fieldCO2AlarmThreshold.value = readValue.getUint32(32, true);
-        fieldCO2AlarmOnTime.value = ((readValue.getUint32(36, true) + 500) / 1000) >> 0;
+
+        fieldCO2AlarmEnable.checked = ((supportedBitmap & 0x02) == 0) || readValue.getUint32(36, true) != 1;
+        co2AlarmEnableClicked();
+
+        if (!fieldCO2AlarmEnable.checked)
+            fieldCO2AlarmOnTime.value = 240;
+        else
+            fieldCO2AlarmOnTime.value = ((readValue.getUint32(36, true) + 500) / 1000) >> 0;
         fieldCO2AlarmOffTime.value = ((readValue.getUint32(40, true) + 500) / 1000) >> 0;
         fieldCO2NumSamples.value = readValue.getUint32(48, true);
         
@@ -4192,6 +4227,7 @@ const fieldRampRate = document.querySelector("#frampRate");
 const fieldStartPause = document.querySelector("#fstartPause");
 const fieldDoorSpeed = document.querySelector("#fdoorSpeed");
 const fieldFixedSpeed = document.querySelector("#ffixedSpeed");
+const fieldFixedSpeedLbl = document.querySelector("#ffixedSpeedLbl");
 const fieldTargetPressure = document.querySelector("#ftargetPressure");
 const fieldMinSpeed = document.querySelector("#fminSpeed");
 const fieldStepSize = document.querySelector("#fstepSize");
@@ -4235,6 +4271,7 @@ function handleModeClick(myRadio)
     if (myRadio.value == 0)
     {
         fieldFixedSpeed.disabled = false;
+        fieldFixedSpeedLbl.innerHTML = "Fixed Fan Speed";
         fieldTargetPressure.disabled = true;
         fieldMinSpeed.disabled = true;
         fieldStepSize.disabled = true;
@@ -4242,7 +4279,15 @@ function handleModeClick(myRadio)
     }
     else
     {
-        fieldFixedSpeed.disabled = true;
+        if (protocolVersion >= 3)
+        {
+            fieldFixedSpeed.disabled = false;
+            fieldFixedSpeedLbl.innerHTML = "Starting Fan Speed";
+        }
+        else
+        {
+            fieldFixedSpeed.disabled = true;
+        }
         fieldTargetPressure.disabled = false;
         fieldMinSpeed.disabled = false;
         fieldStepSize.disabled = false;
@@ -4306,7 +4351,15 @@ class blueToothSettings extends blueToothIf
           setRadioInput("fco2Mode", readValue.getUint16(22, true));
         }
 
-        fieldFixedSpeed.disabled = mode == 1;
+        if (protocolVersion >= 3)
+        {
+            fieldFixedSpeed.disabled = false;
+            fieldFixedSpeedLbl.innerHTML = (mode == 0) ? "Fixed Fan Speed" : "Starting Fan Speed";
+        }
+        else
+        {
+            fieldFixedSpeed.disabled = mode == 1;
+        }
         fieldTargetPressure.disabled = mode == 0;
         fieldMinSpeed.disabled = mode == 0;
         fieldStepSize.disabled = mode == 0;
@@ -4589,6 +4642,10 @@ class blueToothGeneral extends blueToothIf
         }
         bleiface.protocolVersionSet();
         bleiface.setMessage(DBG_CONNECT, "Version: " + this.version);  
+        if (supportedBitmap & 0x02)
+            fieldCO2AlarmEnableDiv.style.display = "block";
+        else
+            fieldCO2AlarmEnableDiv.style.display = "none";
     }    
 }
 
