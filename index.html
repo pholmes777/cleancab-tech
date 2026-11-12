@@ -62,7 +62,7 @@
   <h3>Connection</h3>
   <div class="container">
     <div class="row">
-        <p id="connectingVersion">Cleancab App Version: 1.09</p>
+        <p id="connectingVersion">Cleancab App Version: 1.09a</p>
     </div>
     <div class="row">
       <div style="width: 100%;height: 150px;background-image: url('tech/cleancab.png'); background-repeat: no-repeat; background-size: contain; background-position: center;">
@@ -123,7 +123,12 @@
       <div class="col-25">
       </div>
       <div class="col-75">
-        <button onclick="generatePDF()">Download PDF</button>
+        <button onclick="generatePDF()">Generate PDF</button>
+        <div id="pdfReadyActions" style="display:none; margin-top:12px;">
+          <p id="pdfReadyMessage">Your PDF is ready.</p>
+          <button type="button" onclick="shareReportPDF()">Share / Save PDF</button>
+          <p style="margin-top:8px;">If sharing is unavailable, <a id="openReportPDF" href="#" target="_blank" rel="noopener">open the PDF</a> and use the browser's share or save option.</p>
+        </div>
       </div>
     </div>  
   </div>
@@ -6998,8 +7003,39 @@ function sanitizeFilename(inputName)
   return trimmed;
 }
 
+// Holds the generated PDF until the user explicitly shares or opens it.
+let pendingReportPDF = null;
+
+function isAppleMobileBrowser() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+async function shareReportPDF() {
+  if (!pendingReportPDF) return;
+
+  const { file, url, filename } = pendingReportPDF;
+  try {
+    if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+    } else {
+      // Fallback: open the PDF in the browser; the user can then use its share/save controls.
+      window.open(url, "_blank", "noopener");
+      document.querySelector("#pdfReadyMessage").textContent =
+        "If the PDF opened in a new tab, use the browser's share or save option.";
+    }
+  } catch (error) {
+    if (error && error.name !== "AbortError") {
+      document.querySelector("#pdfReadyMessage").textContent =
+        "Sharing was unavailable. Use the Open PDF link below instead.";
+    }
+  }
+}
+
 async function generatePDF() 
 {
+  try {
+  tableData = [];
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF();
 
@@ -7133,10 +7169,31 @@ async function generatePDF()
     theme: 'grid'
   });
  
-  let filename = sanitizeFilename(document.querySelector("#pdfFileName").value)
-  
-  // Save PDF
-  doc.save(filename);
+  let filename = sanitizeFilename(document.querySelector("#pdfFileName").value);
+
+  if (isAppleMobileBrowser()) {
+    // Do not rely on a scripted download in Bluefy/iOS. Prepare a File and
+    // wait for the user to tap Share / Save PDF (a separate user gesture).
+    const pdfBlob = doc.output("blob");
+    const pdfFile = new File([pdfBlob], filename, { type: "application/pdf" });
+    if (pendingReportPDF && pendingReportPDF.url) {
+      URL.revokeObjectURL(pendingReportPDF.url);
+    }
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    pendingReportPDF = { file: pdfFile, url: pdfUrl, filename: filename };
+    document.querySelector("#openReportPDF").href = pdfUrl;
+    document.querySelector("#pdfReadyMessage").textContent =
+      filename + " is ready. Tap Share / Save PDF, then choose Save to Files.";
+    document.querySelector("#pdfReadyActions").style.display = "block";
+  } else {
+    // Preserve the existing direct-download behaviour on Android and desktop.
+    doc.save(filename);
+    document.querySelector("#pdfReadyActions").style.display = "none";
+  }
+  } catch (error) {
+    console.error("PDF generation failed:", error);
+    alert("Unable to generate the PDF. Please check the report data and try again.");
+  }
 }
 
     // Helper to convert image URL to base64
