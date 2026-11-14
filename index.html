@@ -62,7 +62,7 @@
   <h3>Connection</h3>
   <div class="container">
     <div class="row">
-        <p id="connectingVersion">Cleancab App Version: 1.09</p>
+        <p id="connectingVersion">Cleancab App Version: 1.09b</p>
     </div>
     <div class="row">
       <div style="width: 100%;height: 150px;background-image: url('tech/cleancab.png'); background-repeat: no-repeat; background-size: contain; background-position: center;">
@@ -2021,6 +2021,43 @@ function logDataTime(data)
     return theTime;
 }
 
+function saveExportFile(blob, fileName)
+{
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (isIOS && navigator.share)
+    {
+        var file = new File([blob], fileName, {type: blob.type || "application/octet-stream"});
+        if (!navigator.canShare || navigator.canShare({files: [file]}))
+        {
+            var panel = document.getElementById("iosFileSharePanel");
+            if (!panel)
+            {
+                panel = document.createElement("div");
+                panel.id = "iosFileSharePanel";
+                panel.style.cssText = "position:fixed;left:0;right:0;bottom:0;z-index:99999;padding:12px;background:#fff;border-top:1px solid #888;text-align:center";
+                document.body.appendChild(panel);
+            }
+            panel.replaceChildren();
+            var button = document.createElement("button");
+            button.type = "button";
+            button.textContent = "Tap to save or share " + fileName;
+            button.onclick = function() {
+                navigator.share({files: [file], title: fileName}).then(function() { panel.remove(); }).catch(function(error) {
+                    if (error.name !== "AbortError") button.textContent = "Share failed ? tap to try again";
+                });
+            };
+            panel.appendChild(button);
+            return;
+        }
+    }
+    var tempLink = document.createElement("a");
+    tempLink.href = URL.createObjectURL(blob);
+    tempLink.download = fileName;
+    tempLink.click();
+    setTimeout(function() { URL.revokeObjectURL(tempLink.href); }, 1000);
+}
+
 // Log base class
 
 class historyClass
@@ -2165,13 +2202,8 @@ class historyClass
     
         if (this.exporting)
         {
-            var tempLink = document.createElement("a");
             var taBlob = new Blob([this.fileData], {type: 'text/plain'});
-            tempLink.setAttribute('href', URL.createObjectURL(taBlob));
-            tempLink.setAttribute('download', this.fileName);
-            tempLink.click();
-  
-            URL.revokeObjectURL(tempLink.href);
+            saveExportFile(taBlob, this.fileName);
             this.fileData = "";
         }
    
@@ -5083,13 +5115,8 @@ class recorderClass
                                 this.chart.data.datasets[2].data[i] + "\r\n";
                     i++;
                 }
-                var tempLink = document.createElement("a");
                 var taBlob = new Blob([filedata], {type: 'text/plain'});
-                tempLink.setAttribute('href', URL.createObjectURL(taBlob));
-                tempLink.setAttribute('download', "test_report.txt");
-                tempLink.click();
-
-                URL.revokeObjectURL(tempLink.href);
+                saveExportFile(taBlob, "test_report.txt");
             }
         }
     }
@@ -7136,7 +7163,7 @@ async function generatePDF()
   let filename = sanitizeFilename(document.querySelector("#pdfFileName").value)
   
   // Save PDF
-  doc.save(filename);
+  saveExportFile(doc.output('blob'), filename);
 }
 
     // Helper to convert image URL to base64
